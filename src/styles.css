@@ -1,0 +1,10 @@
+/* Color grading styles for dynamic filters */
+.color-grade-overlay,
+.color-grade-img,
+.color-grade-preview {
+  transition: filter 0.3s ease;
+}
+
+/* These will be applied dynamically via inline styles for now 
+   since CSS variables can't handle the complex filter combinations needed.
+   The classes are kept for consistency and future optimization. */

@@ -1,0 +1,24 @@
+/* Dynamic styles for accessibility fixes */
+
+/* Color filter styles */
+.color-filter-preview {
+  filter: var(--filter-value);
+}
+
+.color-filter-image {
+  filter: var(--filter-value);
+}
+
+.color-filter-video {
+  filter: var(--filter-value);
+}
+
+/* Progress bar styles */
+.progress-bar-fill {
+  width: var(--progress-width);
+}
+
+/* Duration progress bar */
+.duration-progress {
+  width: var(--duration-width);
+}

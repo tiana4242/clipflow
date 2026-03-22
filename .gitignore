@@ -1,0 +1,53 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Upload directories (keep structure, ignore content)
+uploads/*
+!uploads/.gitkeep
+processed/*
+!processed/.gitkeep
+
+# Vercel
+.vercel
+vercel.json
+
+# Railway
+railway.json
+
+# Keep Render configs
+!render.yaml
+!RENDER-DEPLOYMENT.md
+
+# Package manager
+package-lock.json
+yarn.lock
+
+# Temporary files
+tmp/
+temp/
+*.bak
+*.backup
