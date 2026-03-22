@@ -17,6 +17,11 @@ dist-ssr
 !.vscode/extensions.json
 .idea
 .DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 
 # Environment variables
 .env
@@ -42,6 +47,11 @@ railway.json
 !render.yaml
 !RENDER-DEPLOYMENT.md
 
+# Keep Netlify configs
+!netlify.toml
+!netlify/
+!NETLIFY-DEPLOYMENT.md
+
 # Package manager
 package-lock.json
 yarn.lock
@@ -51,3 +61,6 @@ tmp/
 temp/
 *.bak
 *.backup
+
+# Netlify
+.netlify/
