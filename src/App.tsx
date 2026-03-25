@@ -11,6 +11,8 @@ import {
 } from 'lucide-react';
 import { createClient } from '@supabase/supabase-js';
 import { API_CONFIG } from './config/api';
+import { PWAInstallPrompt } from './components/PWAInstallPrompt';
+import { OfflineIndicator } from './components/OfflineIndicator';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -2302,6 +2304,10 @@ export default function App() {
           </Button>
         </div>
       </Modal>
+      
+      {/* PWA Components */}
+      <PWAInstallPrompt />
+      <OfflineIndicator />
     </div>
   );
 }
