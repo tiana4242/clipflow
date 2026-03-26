@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './accessibility-styles.css';
+import './styles/dynamic-styles.css';
 import { 
   Scissors, Upload, Play, Download, X, LogOut, Loader2, Trash2, 
   LayoutGrid, List, Share2, Facebook, Youtube, Music2, 
@@ -338,11 +339,10 @@ const ClipCard: React.FC<{
           src={clip.thumbnail_url} 
           alt={displayTitle}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 color-filter-preview"
-          style={{
-            '--filter-value': clip.color_grade 
-              ? `brightness(${clip.color_grade.brightness}%) contrast(${clip.color_grade.contrast}%) saturate(${clip.color_grade.saturation}%) ${getFilterCSS(clip.color_grade.filter)}` 
-              : 'none'
-          } as React.CSSProperties}
+          data-filter-value={clip.color_grade 
+            ? `brightness(${clip.color_grade.brightness}%) contrast(${clip.color_grade.contrast}%) saturate(${clip.color_grade.saturation}%) ${getFilterCSS(clip.color_grade.filter)}` 
+            : 'none'
+          }
           loading="lazy"
           onError={(e) => {
             (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360"><rect fill="%231e293b" width="640" height="360"/><text fill="%2364748b" font-family="sans-serif" font-size="20" x="320" y="180" text-anchor="middle">No Preview</text></svg>';
@@ -566,9 +566,7 @@ const ViralScoreModal: React.FC<{
                 <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
                   <div 
                     className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full progress-bar-fill"
-                    style={{
-                      '--progress-width': `${(item.value / item.max) * 100}%`
-                    } as React.CSSProperties}
+                    data-progress-width={`${(item.value / item.max) * 100}%`}
                   />
                 </div>
               </div>
@@ -814,9 +812,7 @@ const ClipEditorModal: React.FC<{
             <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-gradient-to-r from-purple-500 to-pink-500 duration-progress"
-                style={{
-                  '--duration-width': `${Math.min((endTime - startTime) / 60 * 100, 100)}%`
-                } as React.CSSProperties}
+                data-duration-width={`${Math.min((endTime - startTime) / 60 * 100, 100)}%`}
               />
             </div>
           </div>
@@ -1944,9 +1940,7 @@ export default function App() {
                   src={selectedClip.thumbnail_url} 
                   alt="Preview"
                   className="w-full h-full object-cover color-filter-image"
-                  style={{
-                    '--filter-value': `brightness(${colorAdjustments.brightness}%) contrast(${colorAdjustments.contrast}%) saturate(${colorAdjustments.saturation}%) ${getFilterCSS(colorAdjustments.filter)}`
-                  } as React.CSSProperties}
+                  data-filter-value={`brightness(${colorAdjustments.brightness}%) contrast(${colorAdjustments.contrast}%) saturate(${colorAdjustments.saturation}%) ${getFilterCSS(colorAdjustments.filter)}`}
                 />
               </div>
               
@@ -2114,11 +2108,10 @@ export default function App() {
                     className="w-full h-full object-contain color-filter-video"
                     onLoadedData={() => { setVideoLoading(false); setVideoError(null); }}
                     onError={() => { setVideoError('Failed'); setVideoLoading(false); }}
-                    style={{
-                      '--filter-value': selectedClip.color_grade 
-                        ? `brightness(${selectedClip.color_grade.brightness}%) contrast(${selectedClip.color_grade.contrast}%) saturate(${selectedClip.color_grade.saturation}%) ${getFilterCSS(selectedClip.color_grade.filter)}` 
-                        : 'none'
-                    } as React.CSSProperties}
+                    data-filter-value={selectedClip.color_grade 
+                      ? `brightness(${selectedClip.color_grade.brightness}%) contrast(${selectedClip.color_grade.contrast}%) saturate(${selectedClip.color_grade.saturation}%) ${getFilterCSS(selectedClip.color_grade.filter)}` 
+                      : 'none'
+                    }
                   />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center bg-slate-900 z-20">

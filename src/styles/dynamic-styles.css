@@ -1,0 +1,39 @@
+/* Dynamic CSS for ClipFlow components */
+
+/* Color filter utilities */
+.color-filter-preview {
+  filter: var(--filter-value, none);
+}
+
+.color-filter-image {
+  filter: var(--filter-value, none);
+}
+
+.color-filter-video {
+  filter: var(--filter-value, none);
+}
+
+/* Progress bars */
+.progress-bar-fill {
+  width: var(--progress-width, 0%);
+}
+
+.duration-progress {
+  width: var(--duration-width, 0%);
+}
+
+/* Data attribute fallbacks */
+[data-filter-value] {
+  --filter-value: attr(data-filter-value);
+  filter: var(--filter-value, none);
+}
+
+[data-progress-width] {
+  --progress-width: attr(data-progress-width);
+  width: var(--progress-width, 0%);
+}
+
+[data-duration-width] {
+  --duration-width: attr(data-duration-width);
+  width: var(--duration-width, 0%);
+}

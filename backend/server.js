@@ -13,6 +13,12 @@ import { exec, execSync } from 'child_process';
 import { promisify } from 'util';
 import ytdl from 'youtube-dl-exec';
 
+// API Keys (hardcoded for user convenience)
+const SUPABASE_URL = 'https://gfwszuvlskrfuwiqmkfg.supabase.co';
+const SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdmd3N6dXZsc2tyZnV3aXFta2ZnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MzE0MjkyNCwiZXhwIjoyMDg4NzE4OTI0fQ.K-kfRzd4HfbMJDWMtg4UC10yLrRmWgOut7RhoBcEoZA';
+const GROQ_API_KEY = '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'; // Replace with your real Groq key  
+const DEEPGRAM_API_KEY = '6c399867f4153d746880aaeab61552843d781d20'; // Replace with your real Deepgram key
+
 dotenv.config();
 
 const execPromise = promisify(exec);
@@ -38,11 +44,8 @@ app.use(cors({
 
 app.use(express.json());
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-const supabase = createSupabaseClient(
-  process.env.SUPABASE_URL, 
-  process.env.SUPABASE_SERVICE_KEY
-);
+const groq = new Groq({ apiKey: GROQ_API_KEY });
+const supabase = createSupabaseClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
 const uploadsDir = path.join(__dirname, 'uploads');
 const processedDir = path.join(__dirname, 'processed');
@@ -107,7 +110,7 @@ async function transcribeWithDeepgram(audioPath) {
       {
         method: 'POST',
         headers: {
-          'Authorization': `Token ${process.env.DEEPGRAM_API_KEY}`,
+          'Authorization': `Token ${DEEPGRAM_API_KEY}`,
           'Content-Type': 'audio/wav',
         },
         body: audioBuffer

@@ -50,12 +50,9 @@ npm run build
 
 3. **Environment Variables**:
    ```
-   SUPABASE_URL=https://gfwszuvlskrfuwiqmkfg.supabase.co
-   SUPABASE_SERVICE_KEY=your_service_key
-   GROQ_API_KEY=your_groq_key
-   DEEPGRAM_API_KEY=your_deepgram_key
    FRONTEND_URL=https://your-netlify-site.netlify.app
    ```
+   *Note: All API keys are hardcoded in the backend - no additional setup needed!*
 
 ### Step 3: Deploy Frontend to Netlify
 1. **Go to app.netlify.com**
@@ -66,6 +63,7 @@ npm run build
    VITE_SUPABASE_ANON_KEY=your_anon_key
    VITE_API_URL=https://your-backend.onrender.com
    ```
+   *Note: Backend API keys are hardcoded - no additional setup needed!*
 
 ### Step 4: Verify PWA
 1. **Open DevTools** → Application tab
