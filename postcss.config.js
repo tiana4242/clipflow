@@ -8,11 +8,6 @@ export default {
         "not dead",
         "not ie 11"
       ]
-    },
-    'postcss-remove-warnings': {
-      rules: {
-        '-webkit-text-size-adjust': true
-      }
     }
   },
 }
