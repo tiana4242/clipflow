@@ -12,8 +12,15 @@ export default {
           900: '#0f172a',
           800: '#1e293b',
         }
-      }
+      },
     },
   },
   plugins: [],
+  prefix: '',
+  future: {
+    removeDeprecatedGapUtilities: true,
+  },
+  corePlugins: {
+    preflight: false,
+  },
 }
