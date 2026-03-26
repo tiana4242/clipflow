@@ -39,17 +39,35 @@ Your ClipFlow application is now a PWA with these features:
 npm run build
 ```
 
-### Step 2: Deploy to Netlify
+### Step 2: Deploy Backend to Render
+1. **Go to render.com**
+2. **Create Web Service**:
+   - Repository: `clipflow`
+   - Root Directory: `backend`
+   - Runtime: `Node`
+   - Build Command: `npm install`
+   - Start Command: `npm start`
+
+3. **Environment Variables**:
+   ```
+   SUPABASE_URL=https://gfwszuvlskrfuwiqmkfg.supabase.co
+   SUPABASE_SERVICE_KEY=your_service_key
+   GROQ_API_KEY=your_groq_key
+   DEEPGRAM_API_KEY=your_deepgram_key
+   FRONTEND_URL=https://your-netlify-site.netlify.app
+   ```
+
+### Step 3: Deploy Frontend to Netlify
 1. **Go to app.netlify.com**
 2. **Drag & drop `dist` folder**
 3. **Environment Variables**:
    ```
    VITE_SUPABASE_URL=https://gfwszuvlskrfuwiqmkfg.supabase.co
    VITE_SUPABASE_ANON_KEY=your_anon_key
-   VITE_API_URL=https://clip-flow-529p.onrender.com
+   VITE_API_URL=https://your-backend.onrender.com
    ```
 
-### Step 3: Verify PWA
+### Step 4: Verify PWA
 1. **Open DevTools** → Application tab
 2. **Check Manifest** - Should load correctly
 3. **Check Service Worker** - Should be active
