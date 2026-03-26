@@ -9,10 +9,5 @@ export default {
         "not ie 11"
       ]
     },
-    'postcss-remove-warnings': {
-      rules: {
-        '-webkit-text-size-adjust': true
-      }
-    }
   },
 }
