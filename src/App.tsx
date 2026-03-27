@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import './accessibility-styles.css';
 import './styles/dynamic-styles.css';
 import { usePWA } from './hooks/usePWA'
-import { PWAInstallPrompt } from './components/pwa/PWAInstallPrompt'
+import { PWAInstallPrompt } from './components/PWAInstallPrompt'
 import { 
   Scissors, Upload, Play, Download, X, LogOut, Loader2, Trash2, 
   LayoutGrid, List, Share2, Facebook, Youtube, Music2, 
