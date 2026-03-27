@@ -6,9 +6,7 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      strategies: 'injectManifest',
-      srcDir: 'public',
-      filename: 'sw.js',
+      strategies: 'generateSW',
       registerType: 'autoUpdate',
       injectRegister: 'auto',
       manifest: {
@@ -46,11 +44,6 @@ export default defineConfig({
           }
         ]
       },
-      injectManifest: {
-        globDirectory: 'dist',
-        globPatterns: ['**/*.{js,css,html,svg,png,jpg,jpeg,gif,woff2}'],
-        maximumFileSizeToCacheInBytes: 10 * 1024 * 1024
-      },
       workbox: {
         runtimeCaching: [
           {
@@ -83,16 +76,14 @@ export default defineConfig({
         cleanupOutdatedCaches: true
       },
       devOptions: {
-        enabled: true,
-        type: 'module',
-        navigateFallback: 'index.html'
+        enabled: false
       }
     })
   ],
   base: '/clipflow/',
   build: {
     outDir: 'dist',
-    sourcemap: true,
+    sourcemap: false,
     target: 'esnext',
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
