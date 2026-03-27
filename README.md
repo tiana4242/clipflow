@@ -81,9 +81,6 @@ npm run dev
 
 ## 🌐 Deployment
 
-### Render (Recommended - Free)
-[See RENDER-DEPLOYMENT.md](./RENDER-DEPLOYMENT.md) for complete setup instructions.
-
 ### Other Options
 - **Self-hosting**: VPS with Docker
 - **PaaS**: Heroku, Northflank, Fly.io
