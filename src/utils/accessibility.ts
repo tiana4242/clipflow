@@ -8,6 +8,7 @@ export class AccessibilityManager {
   static init() {
     this.liveRegion = document.getElementById('sr-live-region');
     this.alertRegion = document.getElementById('sr-alert-region');
+    this.checkColorContrast();
   }
   
   // Announce messages to screen readers (polite)
@@ -29,6 +30,108 @@ export class AccessibilityManager {
         if (this.alertRegion) this.alertRegion.textContent = '';
       }, 1000);
     }
+  }
+  
+  // Check color contrast ratio
+  static checkColorContrast() {
+    if (typeof window === 'undefined') return;
+    
+    const elements = document.querySelectorAll('*');
+    elements.forEach(element => {
+      const styles = window.getComputedStyle(element);
+      const color = styles.color;
+      const backgroundColor = styles.backgroundColor;
+      
+      if (color && backgroundColor && backgroundColor !== 'rgba(0, 0, 0, 0)') {
+        const ratio = this.getContrastRatio(color, backgroundColor);
+        if (ratio < 4.5) {
+          console.warn(`⚠️ Low contrast detected: ${ratio.toFixed(2)}:1`, element);
+          this.suggestContrastFix(element, color, backgroundColor);
+        }
+      }
+    });
+  }
+  
+  // Calculate contrast ratio between two colors
+  static getContrastRatio(color1: string, color2: string): number {
+    const rgb1 = this.hexToRgb(color1) || this.parseRgb(color1);
+    const rgb2 = this.hexToRgb(color2) || this.parseRgb(color2);
+    
+    if (!rgb1 || !rgb2) return 21; // Default to high contrast if parsing fails
+    
+    const luminance1 = this.getLuminance(rgb1);
+    const luminance2 = this.getLuminance(rgb2);
+    
+    const lighter = Math.max(luminance1, luminance2);
+    const darker = Math.min(luminance1, luminance2);
+    
+    return (lighter + 0.05) / (darker + 0.05);
+  }
+  
+  // Convert hex color to RGB
+  static hexToRgb(hex: string): { r: number; g: number; b: number } | null {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16)
+    } : null;
+  }
+  
+  // Parse RGB color string
+  static parseRgb(rgb: string): { r: number; g: number; b: number } | null {
+    const match = rgb.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+    if (match) {
+      return {
+        r: parseInt(match[1]),
+        g: parseInt(match[2]),
+        b: parseInt(match[3])
+      };
+    }
+    return null;
+  }
+  
+  // Calculate relative luminance
+  static getLuminance(rgb: { r: number; g: number; b: number }): number {
+    const rsRGB = rgb.r / 255;
+    const gsRGB = rgb.g / 255;
+    const bsRGB = rgb.b / 255;
+    
+    const r = rsRGB <= 0.03928 ? rsRGB / 12.92 : Math.pow((rsRGB + 0.055) / 1.055, 2.4);
+    const g = gsRGB <= 0.03928 ? gsRGB / 12.92 : Math.pow((gsRGB + 0.055) / 1.055, 2.4);
+    const b = bsRGB <= 0.03928 ? bsRGB / 12.92 : Math.pow((bsRGB + 0.055) / 1.055, 2.4);
+    
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  }
+  
+  // Suggest contrast fix for low contrast elements
+  static suggestContrastFix(element: Element, textColor: string, bgColor: string) {
+    const rgbText = this.hexToRgb(textColor) || this.parseRgb(textColor);
+    const rgbBg = this.hexToRgb(bgColor) || this.parseRgb(bgColor);
+    
+    if (!rgbText || !rgbBg) return;
+    
+    const textLuminance = this.getLuminance(rgbText);
+    const bgLuminance = this.getLuminance(rgbBg);
+    
+    // Suggest better colors based on WCAG guidelines
+    if (bgLuminance > 0.5) {
+      // Light background, suggest dark text
+      console.log(`💡 Suggestion: Use darker text on light background`);
+    } else {
+      // Dark background, suggest light text
+      console.log(`💡 Suggestion: Use lighter text on dark background`);
+    }
+  }
+  
+  // Get accessible text color for given background
+  static getAccessibleTextColor(backgroundColor: string): string {
+    const rgb = this.hexToRgb(backgroundColor) || this.parseRgb(backgroundColor);
+    if (!rgb) return '#ffffff'; // Default to white
+    
+    const luminance = this.getLuminance(rgb);
+    // Use white text on dark backgrounds, black text on light backgrounds
+    return luminance < 0.5 ? '#ffffff' : '#000000';
   }
   
   // Manage focus trap for modals

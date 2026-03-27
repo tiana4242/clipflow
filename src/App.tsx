@@ -413,7 +413,7 @@ const ClipCard: React.FC<{
           </button>
         </div>
         
-        <p className="text-xs text-slate-500 mb-3">{formatDate(clip.created_at)}</p>
+        <p className="text-xs text-slate-300 mb-3">{formatDate(clip.created_at)}</p>
         
         {/* Hashtags */}
         <div className="mb-3 flex flex-wrap gap-1.5">
@@ -433,7 +433,7 @@ const ClipCard: React.FC<{
           )}
           <button 
             onClick={() => onEditHashtags(clip)}
-            className="opacity-0 group-hover:opacity-100 text-[10px] px-2 py-1 text-slate-500 hover:text-purple-400 transition-colors"
+            className="opacity-0 group-hover:opacity-100 text-[10px] px-2 py-1 text-slate-300 hover:text-purple-400 transition-colors"
             title="Edit hashtags"
           >
             Edit
@@ -589,12 +589,12 @@ const ViralScoreModal: React.FC<{
           <div className="p-3 bg-slate-800/30 rounded-lg text-center">
             <Clock className="w-4 h-4 text-slate-400 mx-auto mb-1" />
             <div className="text-lg font-semibold text-white">{Math.round(duration)}s</div>
-            <div className="text-xs text-slate-500">Duration</div>
+            <div className="text-xs text-slate-300">Duration</div>
           </div>
           <div className="p-3 bg-slate-800/30 rounded-lg text-center">
             <Subtitles className="w-4 h-4 text-slate-400 mx-auto mb-1" />
             <div className="text-lg font-semibold text-white">{(clip.edited_captions || clip.captions)?.length || 0}</div>
-            <div className="text-xs text-slate-500">Captions</div>
+            <div className="text-xs text-slate-300">Captions</div>
           </div>
         </div>
       </div>
@@ -658,7 +658,7 @@ const CaptionEditorModal: React.FC<{
                     placeholder="Start"
                     step="0.1"
                   />
-                  <span className="text-slate-500 self-center">→</span>
+                  <span className="text-slate-300 self-center">→</span>
                   <input
                     type="number"
                     value={cap.endTime}
@@ -784,7 +784,7 @@ const ClipEditorModal: React.FC<{
                   placeholder="Start time"
                   title="Start time in seconds"
                 />
-                <span className="text-slate-500">s</span>
+                <span className="text-slate-300">s</span>
               </div>
             </div>
             
@@ -809,7 +809,7 @@ const ClipEditorModal: React.FC<{
                   placeholder="End time"
                   title="End time in seconds"
                 />
-                <span className="text-slate-500">s</span>
+                <span className="text-slate-300">s</span>
               </div>
             </div>
           </div>
@@ -1499,7 +1499,7 @@ export default function App() {
               <div className="w-full border-t border-slate-800" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-slate-900 text-slate-500">Or continue with email</span>
+              <span className="px-4 bg-slate-900 text-slate-300">Or continue with email</span>
             </div>
           </div>
 
@@ -1824,7 +1824,7 @@ export default function App() {
                         <span className="text-yellow-400 text-sm font-medium flex items-center gap-1">
                           <Zap className="w-4 h-4" /> {calculateViralScore(clip).score}
                         </span>
-                        <span className="text-slate-500">•</span>
+                        <span className="text-slate-300">•</span>
                         <span className="text-slate-400 text-sm">{formatDate(clip.created_at)}</span>
                       </div>
                     </div>
@@ -2144,7 +2144,7 @@ export default function App() {
                 {videoLoading && (
                   <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900 z-10">
                     <Loader2 className="w-10 h-10 animate-spin text-purple-500 mb-2" />
-                    <p className="text-slate-500 text-sm">Loading...</p>
+                    <p className="text-slate-300 text-sm">Loading...</p>
                   </div>
                 )}
                 
@@ -2327,7 +2327,7 @@ export default function App() {
               >
                 <Hash className="w-4 h-4 text-purple-400" />
                 {tag}
-                <Copy className="w-3 h-3 text-slate-500" />
+                <Copy className="w-3 h-3 text-slate-300" />
               </button>
             ))}
           </div>
