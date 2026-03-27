@@ -1,5 +1,7 @@
 // Clip Flow Service Worker
 // Handles offline video processing, caching, and background sync
+import { precacheAndRoute } from 'workbox-precaching';
+precacheAndRoute(self.__WB_MANIFEST);
 
 // Workbox manifest injection point
 self.__WB_MANIFEST
