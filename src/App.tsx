@@ -939,17 +939,17 @@ export default function App() {
   }, [selectedClip]);
 
   useEffect(() => {
+    // Initialize performance optimizations
+    CSSCustomProperties.initialize();
+    
     // Use optimized viewport handling
     const handleViewportUpdate = PerformanceOptimizer.createOptimizedResizeHandler(
       CSSCustomProperties.updateViewportUnits
     );
     
-    // Initial update
-    CSSCustomProperties.updateViewportUnits();
-    
-    // Add event listeners
-    window.addEventListener('resize', handleViewportUpdate);
-    window.addEventListener('orientationchange', handleViewportUpdate);
+    // Add event listeners with passive option for better performance
+    window.addEventListener('resize', handleViewportUpdate, { passive: true });
+    window.addEventListener('orientationchange', handleViewportUpdate, { passive: true });
     
     return () => {
       window.removeEventListener('resize', handleViewportUpdate);
