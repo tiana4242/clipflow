@@ -1,0 +1,25 @@
+# ClipFlow Robots.txt
+# https://www.clipflow.app
+
+User-agent: *
+Allow: /
+
+# Block access to admin and sensitive areas
+Disallow: /admin/
+Disallow: /api/
+Disallow: /uploads/
+Disallow: /processed/
+Disallow: /*.env
+Disallow: /*.json$
+
+# Allow search engines to index main content
+Allow: /src/
+Allow: /public/
+Allow: /manifest.json
+Allow: /sw.js
+
+# Sitemap location
+Sitemap: https://www.clipflow.app/sitemap.xml
+
+# Crawl delay (optional, be nice to servers)
+Crawl-delay: 1

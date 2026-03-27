@@ -1264,6 +1264,56 @@ app.get('/', (req, res) => {
   });
 });
 
+// Serve robots.txt
+app.get('/robots.txt', (req, res) => {
+  res.type('text/plain');
+  res.send(`# ClipFlow Robots.txt
+# https://www.clipflow.app
+
+User-agent: *
+Allow: /
+
+# Block access to admin and sensitive areas
+Disallow: /admin/
+Disallow: /api/
+Disallow: /uploads/
+Disallow: /processed/
+Disallow: /*.env
+Disallow: /*.json$
+
+# Allow search engines to index main content
+Allow: /src/
+Allow: /public/
+Allow: /manifest.json
+Allow: /sw.js
+
+# Sitemap location
+Sitemap: https://www.clipflow.app/sitemap.xml
+
+# Crawl delay (optional, be nice to servers)
+Crawl-delay: 1`);
+});
+
+// Serve sitemap.xml
+app.get('/sitemap.xml', (req, res) => {
+  res.type('application/xml');
+  res.send(`<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://www.clipflow.app/</loc>
+    <lastmod>2024-01-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://www.clipflow.app/manifest.json</loc>
+    <lastmod>2024-01-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+</urlset>`);
+});
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
