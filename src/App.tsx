@@ -1555,8 +1555,13 @@ export default function App() {
   // Main App
   return (
     <div className="min-h-[100dvh] bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-100 pb-20 md:pb-0">
+      {/* Skip to main content target */}
+      <div id="main-content" tabIndex={-1} className="sr-only">
+        Main content starts here
+      </div>
+      
       {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-slate-800/50 bg-slate-950/80 backdrop-blur-xl">
+      <header id="nav" className="sticky top-0 z-40 border-b border-slate-800/50 bg-slate-950/80 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl shadow-lg shadow-purple-500/20">
@@ -2357,6 +2362,11 @@ export default function App() {
           </Button>
         </div>
       </Modal>
+      
+      {/* Footer target for skip links */}
+      <footer id="footer" tabIndex={-1} className="sr-only">
+        Footer content
+      </footer>
     </div>
   );
 }
