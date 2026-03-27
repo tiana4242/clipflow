@@ -15,6 +15,7 @@ export const usePWA = () => {
   const [isInstalled, setIsInstalled] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
+  const [showInstallButton, setShowInstallButton] = useState(false);
 
   useEffect(() => {
     // Check if app is already installed
@@ -28,8 +29,10 @@ export const usePWA = () => {
     // Listen for beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
+      const prompt = e as BeforeInstallPromptEvent;
+      setDeferredPrompt(prompt);
       setIsInstallable(true);
+      setShowInstallButton(true);
       
       // Show install prompt after a delay
       setTimeout(() => {
@@ -43,6 +46,7 @@ export const usePWA = () => {
       setIsInstallable(false);
       setDeferredPrompt(null);
       setShowInstallPrompt(false);
+      setShowInstallButton(false);
     };
 
     // Listen for online/offline events
@@ -72,10 +76,12 @@ export const usePWA = () => {
       const { outcome } = await deferredPrompt.userChoice;
       
       if (outcome === 'accepted') {
+        console.log('User accepted install');
         setIsInstalled(true);
         setIsInstallable(false);
         setDeferredPrompt(null);
         setShowInstallPrompt(false);
+        setShowInstallButton(false);
         return true;
       }
     } catch (error) {
@@ -89,12 +95,26 @@ export const usePWA = () => {
     setShowInstallPrompt(false);
   };
 
+  const handleInstallClick = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        console.log('User accepted install');
+      }
+      setDeferredPrompt(null);
+      setShowInstallButton(false);
+    }
+  };
+
   return {
     isInstallable,
     isInstalled,
     isOnline,
     showInstallPrompt,
+    showInstallButton,
     install,
-    dismissInstallPrompt
+    dismissInstallPrompt,
+    handleInstall: handleInstallClick
   };
 };
