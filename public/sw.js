@@ -235,7 +235,7 @@ async function networkFirst(request, cacheName, maxAge = 5 * 60 * 1000) {
       return new Response(cached.body, { 
         status: cached.status, 
         statusText: cached.statusText, 
-        headers 
+        headers: headers // <--- FIX: Added missing colon
       });
     }
     throw err;
@@ -247,6 +247,11 @@ async function staleWhileRevalidate(request, cacheName) {
   const cached = await cache.match(request);
   
   const fetchPromise = fetch(request).then((response) => {
+    // Don't cache chrome-extension requests
+    if (request.url.startsWith('chrome-extension://')) {
+      return response;
+    }
+    
     if (response.ok) {
       cache.put(request, response.clone());
     }
