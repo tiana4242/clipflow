@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
 import type { User, Clip } from '../types'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://gfwszuvlskrfuwiqmkfg.supabase.co'
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsaXBmbG93LWJhY2tlbmQiLCJpYXQiOjE3MjQyMjI4MDAsImV4cCI6MTc0NDgwMDgwMH0.8QKlJ6ZqJ3XQXJjZ3J4hQzR5dW9hN1hLd0VxY0JqN1d1M2F4'
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
