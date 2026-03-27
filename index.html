@@ -20,7 +20,11 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Clip Flow" />
-  <meta name="description" content="AI-powered video clipping and sharing tool" />
+  <meta name="description" content="AI-powered video clipping and sharing tool for creating engaging video content" />
+  
+  <!-- Accessibility Meta Tags -->
+  <meta name="author" content="Clip Flow Team" />
+  <meta name="keywords" content="video editing, clipping, AI, social media, content creation" />
   
   <!-- Icons -->
   <link rel="icon" href="/favicon.ico" />
@@ -31,11 +35,47 @@
   <!-- Manifest -->
   <link rel="manifest" href="/manifest.json" />
   
-  <title>Clip Flow - Smart Video Clipper</title>
+  <title>Clip Flow - Smart Video Clipper | AI-Powered Video Editing</title>
+  
+  <!-- Skip to main content link for accessibility -->
+  <style>
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 6px;
+      background: #0f172a;
+      color: white;
+      padding: 8px;
+      text-decoration: none;
+      border-radius: 4px;
+      z-index: 1000;
+      transition: top 0.3s;
+    }
+    .skip-link:focus {
+      top: 6px;
+    }
+  </style>
 </head>
 <body>
-  <div id="root"></div>
+  <!-- Skip to main content for screen readers -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  
+  <!-- Main application container with proper landmark -->
+  <div id="root" role="application" aria-label="Clip Flow Video Editor"></div>
+  
+  <!-- Fallback for users without JavaScript -->
+  <noscript>
+    <div style="text-align: center; padding: 2rem; font-family: Arial, sans-serif;">
+      <h1>JavaScript Required</h1>
+      <p>You need to enable JavaScript to run Clip Flow video processor.</p>
+      <p>Please enable JavaScript in your browser settings and reload the page.</p>
+    </div>
+  </noscript>
+  
+  <!-- Screen reader announcements -->
+  <div id="sr-live-region" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+  <div id="sr-alert-region" aria-live="assertive" aria-atomic="true" class="sr-only"></div>
+  
   <script type="module" src="/src/main.tsx"></script>
-  <noscript>You need to enable JavaScript to run Clip Flow video processor.</noscript>
 </body>
 </html>

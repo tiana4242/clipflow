@@ -3,6 +3,7 @@ import './styles/dynamic-styles.css';
 import { usePWA } from './hooks/usePWA'
 import { PWAInstallPrompt } from './components/PWAInstallPrompt'
 import { PerformanceOptimizer, CSSCustomProperties } from './utils/performance'
+import { AccessibilityManager } from './utils/accessibility'
 import { 
   Scissors, Upload, Play, Download, X, LogOut, Loader2, Trash2, 
   LayoutGrid, List, Share2, Facebook, Youtube, Music2, 
@@ -901,6 +902,9 @@ export default function App() {
 
   // Effects
   useEffect(() => {
+    // Initialize accessibility manager
+    AccessibilityManager.init();
+    
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       // Defer clips fetch to improve critical path
@@ -914,6 +918,7 @@ export default function App() {
       // Defer clips fetch to improve critical path
       if (session) {
         setTimeout(() => fetchClips(), 100);
+        AccessibilityManager.announce('Successfully signed in to Clip Flow');
       }
     });
 
