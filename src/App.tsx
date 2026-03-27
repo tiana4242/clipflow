@@ -4,6 +4,8 @@ import { usePWA } from './hooks/usePWA'
 import { PWAInstallPrompt } from './components/PWAInstallPrompt'
 import { PerformanceOptimizer, CSSCustomProperties } from './utils/performance'
 import { AccessibilityManager } from './utils/accessibility'
+import { supabase } from './lib/supabase'
+import { API_CONFIG } from './config/api'
 import { 
   Scissors, Upload, Play, Download, X, LogOut, Loader2, Trash2, 
   LayoutGrid, List, Share2, Facebook, Youtube, Music2, 
@@ -13,12 +15,6 @@ import {
   Crop, Clock, Zap, PlusCircle, Pencil,
   Tag
 } from 'lucide-react';
-import { createClient } from '@supabase/supabase-js';
-import { API_CONFIG } from './config/api';
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
 
 const API_URL = API_CONFIG.getCurrentUrl();
 
