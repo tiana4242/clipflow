@@ -1,68 +1,72 @@
 {
-  "name": "ClipFlow - AI Video Clipping",
-  "short_name": "ClipFlow",
-  "description": "AI-powered video clipping application for creating viral content",
+  "name": "Clip Flow - Smart Video Clipper",
+  "short_name": "Clip Flow",
+  "description": "AI-powered video clipping, trimming, and sharing tool with offline support",
   "start_url": "/",
+  "id": "/",
   "display": "standalone",
   "background_color": "#0f172a",
-  "theme_color": "#3b82f6",
-  "orientation": "portrait",
+  "theme_color": "#0f172a",
+  "orientation": "any",
   "scope": "/",
   "lang": "en",
-  "categories": ["productivity", "video", "media"],
+  "categories": ["video", "productivity", "social", "utilities"],
   "icons": [
     {
-      "src": "/vite.svg",
+      "src": "/icons/icon-192x192.png",
       "sizes": "192x192",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
-      "src": "/vite.svg",
+      "src": "/icons/icon-512x512.png",
       "sizes": "512x512",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "/screenshot-wide.png",
-      "sizes": "1280x720",
       "type": "image/png",
-      "form_factor": "wide"
+      "purpose": "any"
     },
     {
-      "src": "/screenshot-narrow.png",
-      "sizes": "640x1136",
+      "src": "/icons/icon-maskable-192x192.png",
+      "sizes": "192x192",
       "type": "image/png",
-      "form_factor": "narrow"
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
-  "features": [
-    "offline-support",
-    "video-processing",
-    "ai-analysis",
-    "cross-platform"
-  ],
+  "share_target": {
+    "action": "/",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
+      "files": [
+        {
+          "name": "video",
+          "accept": ["video/*", "video/mp4", "video/webm", "video/quicktime"]
+        }
+      ]
+    }
+  },
   "shortcuts": [
     {
-      "name": "Upload Video",
-      "short_name": "Upload",
-      "description": "Upload a new video for analysis",
-      "url": "/?action=upload",
-      "icons": [{ "src": "/vite.svg", "sizes": "96x96" }]
+      "name": "New Clip",
+      "short_name": "Clip",
+      "description": "Start creating a new video clip",
+      "url": "/?action=new-clip",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
     },
     {
       "name": "My Clips",
-      "short_name": "Clips",
-      "description": "View your created clips",
-      "url": "/?action=clips",
-      "icons": [{ "src": "/vite.svg", "sizes": "96x96" }]
+      "short_name": "Library",
+      "description": "View your saved clips",
+      "url": "/?action=library",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
     }
-  ],
-  "related_applications": [],
-  "prefer_related_applications": false,
-  "edge_side_panel": {
-    "preferred_width": 400
-  }
+  ]
 }

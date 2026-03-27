@@ -1,15 +1,117 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { VitePWA } from 'vite-plugin-pwa'
 
-// https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
-  server: {
-    port: 5173,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:3001',
-        changeOrigin: true,
+  plugins: [
+    react(),
+    VitePWA({
+      strategies: 'injectManifest',
+      srcDir: 'public',
+      filename: 'sw.js',
+      registerType: 'autoUpdate',
+      injectRegister: 'auto',
+      manifest: {
+        name: 'Clip Flow - Smart Video Clipper',
+        short_name: 'Clip Flow',
+        description: 'AI-powered video clipping with offline support',
+        theme_color: '#0f172a',
+        background_color: '#0f172a',
+        display: 'standalone',
+        orientation: 'any',
+        scope: '/',
+        start_url: '/',
+        icons: [
+          {
+            src: '/icons/icon-192x192.png',
+            sizes: '192x192',
+            type: 'image/png'
+          },
+          {
+            src: '/icons/icon-512x512.png',
+            sizes: '512x512',
+            type: 'image/png'
+          },
+          {
+            src: '/icons/icon-maskable-192x192.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'maskable'
+          },
+          {
+            src: '/icons/icon-maskable-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable'
+          }
+        ]
+      },
+      injectManifest: {
+        globDirectory: 'dist',
+        globPatterns: ['**/*.{js,css,html,svg,png,jpg,jpeg,gif,woff2}'],
+        maximumFileSizeToCacheInBytes: 10 * 1024 * 1024
+      },
+      workbox: {
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/unpkg\.com\/@ffmpeg\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'ffmpeg-core',
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 24 * 60 * 60
+              }
+            }
+          },
+          {
+            urlPattern: /.*\.(mp4|webm|mov|avi|mkv)$/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'video-assets',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 7 * 24 * 60 * 60
+              },
+              rangeRequests: true
+            }
+          },
+          {
+            urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'api-cache',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 24 * 60 * 60
+              },
+              networkTimeoutSeconds: 10
+            }
+          }
+        ],
+        skipWaiting: true,
+        clientsClaim: true,
+        cleanupOutdatedCaches: true
+      },
+      devOptions: {
+        enabled: true,
+        type: 'module',
+        navigateFallback: 'index.html'
+      }
+    })
+  ],
+  build: {
+    outDir: 'dist',
+    sourcemap: true,
+    target: 'esnext',
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'ffmpeg-core': ['@ffmpeg/ffmpeg', '@ffmpeg/util'],
+          'vendor': ['react', 'react-dom'],
+          'ui': ['@headlessui/react', 'lucide-react']
+        }
       }
     }
   }

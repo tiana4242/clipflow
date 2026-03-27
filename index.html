@@ -1,18 +1,35 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#3b82f6" />
-    <meta name="msapplication-TileColor" content="#3b82f6" />
-    <meta name="msapplication-navbutton-color" content="#3b82f6" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="#3b82f6" />
-    <title>clipflow</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <!-- PWA Meta Tags -->
+  <meta name="theme-color" content="#3b82f6" />
+  <meta name="msapplication-TileColor" content="#3b82f6" />
+  <meta name="msapplication-navbutton-color" content="#3b82f6" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Clip Flow" />
+  <meta name="description" content="AI-powered video clipping and sharing tool" />
+  
+  <!-- Icons -->
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+  <link rel="mask-icon" href="/mask-icon.svg" color="#0f172a" />
+  
+  <!-- Manifest -->
+  <link rel="manifest" href="/manifest.json" />
+  
+  <!-- Preconnect for performance -->
+  <link rel="preconnect" href="https://unpkg.com" />
+  <link rel="preconnect" href="https://your-project.supabase.co" />
+  
+  <title>Clip Flow - Smart Video Clipper</title>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+  <noscript>You need to enable JavaScript to run Clip Flow video processor.</noscript>
+</body>
 </html>
