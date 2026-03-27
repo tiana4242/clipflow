@@ -82,11 +82,13 @@
   <link rel="preconnect" href="https://unpkg.com" />
   <link rel="preconnect" href="https://gfwszuvlskrfuwiqmkfg.supabase.co" />
   <link rel="dns-prefetch" href="http://localhost:3001" />
-  <link rel="prefetch" href="/manifest.json" />
   
   <!-- Preload critical resources -->
-  <link rel="preload" href="/src/main.tsx" as="script" type="module" />
+  <link rel="preload" href="/src/main.tsx" as="script" type="module" crossorigin="anonymous" />
   <link rel="preload" href="/src/index.css" as="style" />
+  
+  <!-- Preload critical icon -->
+  <link rel="preload" as="image" href="/icons/icon-192x192.png" type="image/png" />
   
   <!-- Inline critical CSS for LCP optimization -->
   <style>
@@ -108,9 +110,6 @@
       src: local('system-ui');
     }
   </style>
-  
-  <!-- Early resource hints for images -->
-  <link rel="preload" as="image" href="/icons/icon-192x192.png" />
   
   <!-- Critical meta tags first -->
   <meta charset="UTF-8" />
