@@ -9,7 +9,10 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "build:analyze": "tsc && vite build --mode analyze",
+    "build:report": "npm run build && npx vite-bundle-analyzer dist/stats.html",
+    "preview": "vite preview",
+    "size-check": "npm run build && npx bundlesize"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
