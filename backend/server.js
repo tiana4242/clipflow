@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import compression from 'compression';
 import multer from 'multer';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import ffmpeg from 'fluent-ffmpeg';
@@ -104,6 +105,25 @@ app.use((req, res, next) => {
   
   next();
 });
+
+// Compression middleware for text compression
+app.use(compression({
+  filter: (req, res) => {
+    if (req.headers['x-no-compression']) {
+      return false;
+    }
+    // Compress all text-based responses
+    return res.getHeader('Content-Type')?.includes('text/') ||
+           res.getHeader('Content-Type')?.includes('application/json') ||
+           res.getHeader('Content-Type')?.includes('application/javascript') ||
+           res.getHeader('Content-Type')?.includes('text/css') ||
+           res.getHeader('Content-Type')?.includes('application/xml');
+  },
+  level: 6, // Compression level (1-9, 6 is default)
+  threshold: 1024, // Only compress responses larger than 1KB
+  windowBits: 15,
+  memLevel: 8
+}));
 
 app.use(express.json());
 
