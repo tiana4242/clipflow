@@ -81,6 +81,15 @@ export default defineConfig({
     })
   ],
   base: '/',
+  server: {
+    hmr: {
+      port: 5173,
+      host: 'localhost'
+    },
+    watch: {
+      usePolling: false
+    }
+  },
   build: {
     outDir: 'dist',
     sourcemap: false,
