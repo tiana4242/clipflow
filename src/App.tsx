@@ -6,6 +6,8 @@ import { PerformanceOptimizer, CSSCustomProperties } from './utils/performance'
 import { AccessibilityManager } from './utils/accessibility'
 import { supabase } from './lib/supabase'
 import { API_CONFIG } from './config/api'
+import { useBatchedAPI } from './utils/batchedAPI'
+import { requestCache, CACHE_KEYS } from './utils/requestCache'
 import { 
   Scissors, Upload, Play, Download, X, LogOut, Loader2, Trash2, 
   LayoutGrid, List, Share2, Facebook, Youtube, Music2, 
@@ -988,6 +990,43 @@ export default function App() {
     setCollections(grouped);
   }, [clips]);
 
+  // Fetch clips with caching and batching
+  const fetchClips = async () => {
+    try {
+      setLoading(true);
+      const token = (await supabase.auth.getSession()).data.session?.access_token;
+      const userId = (await supabase.auth.getUser()).data.user?.id;
+      
+      if (!token || !userId) {
+        throw new Error('User not authenticated');
+      }
+      
+      console.log('🔍 fetchClips - Using batched API with caching');
+      
+      // Use batched API with caching
+      const data = await getClips(userId, token);
+      
+      if (data.clips) {
+        setClips(data.clips);
+        // Update collections
+        const newCollections: Record<string, VideoClip[]> = {};
+        data.clips.forEach((clip: VideoClip) => {
+          const collection = clip.collection_name || 'Uncategorized';
+          if (!newCollections[collection]) {
+            newCollections[collection] = [];
+          }
+          newCollections[collection].push(clip);
+        });
+        setCollections(newCollections);
+      }
+    } catch (err) {
+      console.error('❌ Failed to fetch clips:', err);
+      setError('Failed to load clips');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Auth Functions
   const signInWithGoogle = async () => {
     setGoogleLoading(true);
@@ -1027,41 +1066,6 @@ export default function App() {
   };
 
   // Data Functions
-  const fetchClips = async () => {
-    try {
-      const token = (await supabase.auth.getSession()).data.session?.access_token;
-      
-      // DEBUG: Log the exact URL being used
-      console.log('🔍 fetchClips - API_URL:', API_URL);
-      console.log('🔍 fetchClips - Full URL:', `${API_URL}/api/clips`);
-      
-      // Add timeout and retry logic
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
-      
-      const res = await fetch(`${API_URL}/api/clips`, {
-        headers: { 'Authorization': `Bearer ${token}` },
-        signal: controller.signal
-      });
-      
-      clearTimeout(timeoutId);
-      
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-      }
-      
-      const data = await res.json();
-      if (data.clips) {
-        setClips(data.clips);
-      }
-    } catch (err) {
-      console.error('❌ Failed to fetch clips:', err);
-      console.error('❌ Error details:', err.message);
-      console.error('❌ API_URL being used:', API_URL);
-      // Don't set error state, just log it to avoid UI disruption
-    }
-  };
-
   const getVideoUrl = (clip: VideoClip): string => {
     if (clip.video_url) return clip.video_url;
     if (clip.original_video) return `${API_URL}/uploads/${clip.original_video}`;
