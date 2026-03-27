@@ -2,7 +2,15 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import { resolve } from 'path'
-import compression from 'vite-plugin-compression'
+import type { Connect } from 'vite'
+
+// Try to import compression plugin, but handle if it's not available
+let compression: any = null;
+try {
+  compression = require('vite-plugin-compression');
+} catch (error) {
+  console.warn('vite-plugin-compression not found, compression will be disabled in development');
+}
 
 export default defineConfig(({ mode }) => {
   const isAnalyze = mode === 'analyze'
@@ -10,18 +18,21 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [
       react(),
-      compression({
-        algorithm: 'gzip',
-        ext: '.gz',
-        threshold: 1024, // Only compress files larger than 1KB
-        deleteOriginalAssets: false
-      }),
-      compression({
-        algorithm: 'brotliCompress',
-        ext: '.br',
-        threshold: 1024,
-        deleteOriginalAssets: false
-      }),
+      // Only add compression plugins if the module is available
+      ...(compression ? [
+        compression({
+          algorithm: 'gzip',
+          ext: '.gz',
+          threshold: 1024, // Only compress files larger than 1KB
+          deleteOriginalAssets: false
+        }),
+        compression({
+          algorithm: 'brotliCompress',
+          ext: '.br',
+          threshold: 1024,
+          deleteOriginalAssets: false
+        })
+      ] : []),
       VitePWA({
         strategies: 'generateSW',
         registerType: 'autoUpdate',
@@ -126,7 +137,7 @@ export default defineConfig(({ mode }) => {
         interval: 100
       },
       middleware: [
-        (req, res, next) => {
+        (req: Connect.IncomingMessage, res: Connect.ServerResponse, next: Connect.NextFunction) => {
           // Enable compression for text-based files
           const acceptEncoding = req.headers['accept-encoding'] || '';
           const shouldCompress = acceptEncoding.includes('gzip') || acceptEncoding.includes('br');
