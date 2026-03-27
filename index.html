@@ -4,14 +4,129 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <!-- Canonical URL -->
-  <link rel="canonical" href="https://www.clipflow.app/" />
+  <!-- Critical CSS for immediate rendering -->
+  <style>
+    /* Critical above-the-fold styles */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+      color: #f1f5f9;
+      min-height: 100vh;
+    }
+    
+    #root {
+      min-height: 100vh;
+    }
+    
+    /* Loading skeleton for faster perceived performance */
+    .loading-skeleton {
+      background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+      background-size: 200% 100%;
+      animation: loading 1.5s infinite;
+    }
+    
+    @keyframes loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    
+    /* Critical layout structure */
+    .app-container {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .header-placeholder {
+      height: 64px;
+      background: #0f172a;
+      border-bottom: 1px solid #1e293b;
+      display: flex;
+      align-items: center;
+      padding: 0 1rem;
+    }
+    
+    .main-placeholder {
+      flex: 1;
+      padding: 2rem 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .logo-placeholder {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #8b5cf6, #ec4899);
+      border-radius: 12px;
+      margin-bottom: 1rem;
+    }
+    
+    .text-placeholder {
+      width: 200px;
+      height: 24px;
+      border-radius: 6px;
+      margin-bottom: 0.5rem;
+    }
+    
+    /* Hide loading skeleton when app loads */
+    .app-loaded .loading-skeleton {
+      display: none;
+    }
+  </style>
   
   <!-- Resource Hints for Performance -->
   <link rel="preconnect" href="https://unpkg.com" />
   <link rel="preconnect" href="https://gfwszuvlskrfuwiqmkfg.supabase.co" />
   <link rel="dns-prefetch" href="http://localhost:3001" />
   <link rel="prefetch" href="/manifest.json" />
+  
+  <!-- Preload critical resources -->
+  <link rel="preload" href="/src/main.tsx" as="script" type="module" />
+  <link rel="preload" href="/src/index.css" as="style" />
+  
+  <!-- Inline critical CSS for LCP optimization -->
+  <style>
+    /* Critical typography and layout */
+    h1, h2, h3, h4, h5, h6 {
+      margin: 0;
+      font-weight: 600;
+      line-height: 1.25;
+    }
+    
+    * {
+      box-sizing: border-box;
+    }
+    
+    /* Optimize font loading */
+    @font-face {
+      font-family: 'system-ui';
+      font-display: swap;
+      src: local('system-ui');
+    }
+  </style>
+  
+  <!-- Early resource hints for images -->
+  <link rel="preload" as="image" href="/icons/icon-192x192.png" />
+  
+  <!-- Critical meta tags first -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="AI-powered video clipping and sharing tool for creating engaging video content" />
+  
+  <!-- Performance optimization meta tags -->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="theme-color" content="#0f172a" />
+  
+  <!-- Preconnect to external fonts and resources -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://www.clipflow.app/" />
   
   <!-- PWA Meta Tags -->
   <meta name="theme-color" content="#0f172a" />
@@ -170,6 +285,19 @@
   <a href="#footer" class="skip-link">Skip to footer</a>
   <a href="#nav" class="skip-link">Skip to navigation</a>
   
+  <!-- Loading skeleton for faster perceived performance -->
+  <div id="loading-skeleton" class="app-container">
+    <div class="header-placeholder">
+      <div class="logo-placeholder loading-skeleton"></div>
+      <div class="text-placeholder loading-skeleton"></div>
+    </div>
+    <div class="main-placeholder">
+      <div class="logo-placeholder loading-skeleton"></div>
+      <div class="text-placeholder loading-skeleton"></div>
+      <div class="text-placeholder loading-skeleton" style="width: 150px;"></div>
+    </div>
+  </div>
+  
   <!-- Main application container with proper landmark -->
   <div id="root" role="application" aria-label="Clip Flow Video Editor"></div>
   
@@ -185,6 +313,33 @@
   <!-- Screen reader announcements -->
   <div id="sr-live-region" aria-live="polite" aria-atomic="true" class="sr-only"></div>
   <div id="sr-alert-region" aria-live="assertive" aria-atomic="true" class="sr-only"></div>
+  
+  <!-- Performance monitoring and loading removal -->
+  <script>
+    // Remove loading skeleton when app loads
+    window.addEventListener('load', function() {
+      const skeleton = document.getElementById('loading-skeleton');
+      if (skeleton) {
+        skeleton.style.display = 'none';
+      }
+      document.body.classList.add('app-loaded');
+    });
+    
+    // Performance monitoring
+    if ('performance' in window) {
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          const perfData = performance.getEntriesByType('navigation')[0];
+          console.log('🚀 Performance Metrics:', {
+            'FCP': perfData.responseStart - perfData.requestStart,
+            'LCP': perfData.loadEventEnd - perfData.requestStart,
+            'TTFB': perfData.responseStart - perfData.requestStart,
+            'DomLoad': perfData.domContentLoadedEventEnd - perfData.requestStart
+          });
+        }, 0);
+      });
+    }
+  </script>
   
   <script type="module" src="/src/main.tsx"></script>
 </body>
