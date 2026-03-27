@@ -88,13 +88,19 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   
-  // 3. API calls (Supabase/Firebase) - Network First
-  if (url.hostname.includes('supabase.co') || url.hostname.includes('firebaseapp.com')) {
-    event.respondWith(networkFirst(request, API_CACHE, 24 * 60 * 60 * 1000)); // 24 hours
+  // 3. Supabase image assets - Cache First with very long cache
+  if (url.hostname.includes('supabase.co') && (url.pathname.includes('/storage/v1/object/public/') || url.pathname.includes('.jpg') || url.pathname.includes('.png') || url.pathname.includes('.webp'))) {
+    event.respondWith(cacheFirst(request, API_CACHE, 7 * 24 * 60 * 60 * 1000)); // 7 days for static images
     return;
   }
   
-  // 4. Static assets (JS/CSS) - Stale While Revalidate
+  // 4. API calls (Supabase/Firebase) - Network First with longer cache
+  if (url.hostname.includes('supabase.co') || url.hostname.includes('firebaseapp.com')) {
+    event.respondWith(networkFirst(request, API_CACHE, 24 * 60 * 60 * 1000)); // 24 hours for API calls
+    return;
+  }
+  
+  // 5. Static assets (JS/CSS) - Stale While Revalidate
   if (isStaticAsset(url.pathname)) {
     event.respondWith(staleWhileRevalidate(request, CORE_CACHE));
     return;
