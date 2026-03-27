@@ -37,6 +37,22 @@
       "purpose": "maskable"
     }
   ],
+  "screenshots": [
+    {
+      "src": "/screenshots/desktop-wide.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Clip Flow desktop interface showing video editing workspace"
+    },
+    {
+      "src": "/screenshots/mobile-narrow.png", 
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Clip Flow mobile interface with video library"
+    }
+  ],
   "share_target": {
     "action": "/",
     "method": "POST",

@@ -91,8 +91,8 @@ export class CSSCustomProperties {
       },
       () => {
         // Writes - batch all writes together
-        this.setViewportHeight();
-        this.setViewportWidth();
+        CSSCustomProperties.setViewportHeight();
+        CSSCustomProperties.setViewportWidth();
       }
     );
   }
