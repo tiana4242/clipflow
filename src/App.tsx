@@ -16,6 +16,14 @@ import {
   Tag
 } from 'lucide-react';
 
+// Debug imports
+console.log('🔍 Icon imports:', {
+  Scissors: typeof Scissors,
+  Upload: typeof Upload,
+  Play: typeof Play,
+  Download: typeof Download
+});
+
 const API_URL = API_CONFIG.getCurrentUrl();
 
 // Types
