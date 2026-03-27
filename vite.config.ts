@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import { resolve } from 'path'
+import compression from 'vite-plugin-compression'
 
 export default defineConfig(({ mode }) => {
   const isAnalyze = mode === 'analyze'
@@ -9,6 +10,18 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [
       react(),
+      compression({
+        algorithm: 'gzip',
+        ext: '.gz',
+        threshold: 1024, // Only compress files larger than 1KB
+        deleteOriginalAssets: false
+      }),
+      compression({
+        algorithm: 'brotliCompress',
+        ext: '.br',
+        threshold: 1024,
+        deleteOriginalAssets: false
+      }),
       VitePWA({
         strategies: 'generateSW',
         registerType: 'autoUpdate',
@@ -111,7 +124,25 @@ export default defineConfig(({ mode }) => {
       watch: {
         usePolling: false,
         interval: 100
-      }
+      },
+      middleware: [
+        (req, res, next) => {
+          // Enable compression for text-based files
+          const acceptEncoding = req.headers['accept-encoding'] || '';
+          const shouldCompress = acceptEncoding.includes('gzip') || acceptEncoding.includes('br');
+          
+          if (shouldCompress && req.url && req.url.includes('.')) {
+            const ext = req.url.split('.').pop()?.toLowerCase();
+            const textExtensions = ['js', 'css', 'html', 'json', 'svg', 'txt', 'xml'];
+            
+            if (textExtensions.includes(ext || '')) {
+              res.setHeader('Content-Encoding', 'gzip');
+              res.setHeader('Vary', 'Accept-Encoding');
+            }
+          }
+          next();
+        }
+      ]
     },
     preview: {
       port: 4173,
@@ -250,7 +281,9 @@ export default defineConfig(({ mode }) => {
       cssCodeSplit: true,
       cssMinify: true,
       assetsInlineLimit: 4096,
-      treeShaking: true
+      treeShaking: true,
+      reportCompressedSize: true,
+      generateBrotli: true
     },
     define: {
       'process.env.NODE_ENV': '"production"'
