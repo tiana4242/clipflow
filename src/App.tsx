@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import './styles/dynamic-styles.css';
 import { usePWA } from './hooks/usePWA'
 import { PWAInstallPrompt } from './components/PWAInstallPrompt'
+import { PerformanceOptimizer, CSSCustomProperties } from './utils/performance'
 import { 
   Scissors, Upload, Play, Download, X, LogOut, Loader2, Trash2, 
   LayoutGrid, List, Share2, Facebook, Youtube, Music2, 
@@ -925,14 +926,22 @@ export default function App() {
   }, [selectedClip]);
 
   useEffect(() => {
-    const setVH = () => {
-      const vh = window.innerHeight * 0.01;
-      document.documentElement.style.setProperty('--vh', `${vh}px`);
-    };
+    // Use optimized viewport handling
+    const handleViewportUpdate = PerformanceOptimizer.createOptimizedResizeHandler(
+      CSSCustomProperties.updateViewportUnits
+    );
     
-    setVH();
-    window.addEventListener('resize', setVH);
-    return () => window.removeEventListener('resize', setVH);
+    // Initial update
+    CSSCustomProperties.updateViewportUnits();
+    
+    // Add event listeners
+    window.addEventListener('resize', handleViewportUpdate);
+    window.addEventListener('orientationchange', handleViewportUpdate);
+    
+    return () => {
+      window.removeEventListener('resize', handleViewportUpdate);
+      window.removeEventListener('orientationchange', handleViewportUpdate);
+    };
   }, []);
 
   useEffect(() => {
