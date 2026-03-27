@@ -2,27 +2,28 @@
 
 import { lazy } from 'react';
 
-// Lazy load heavy components
-export const LazyColorGrader = lazy(() => import('../components/ColorGrader').then(module => ({ 
-  default: module.ColorGrader 
-})));
-
-export const LazyVideoEditor = lazy(() => import('../components/VideoEditor').then(module => ({ 
-  default: module.VideoEditor 
+// Lazy load heavy components that actually exist
+export const LazyErrorBoundary = lazy(() => import('../components/ErrorBoundary').then(module => ({ 
+  default: module.ErrorBoundary 
 })));
 
 export const LazyPWAInstallPrompt = lazy(() => import('../components/PWAInstallPrompt').then(module => ({ 
   default: module.PWAInstallPrompt 
 })));
 
-export const LazyErrorBoundary = lazy(() => import('../components/ErrorBoundary').then(module => ({ 
-  default: module.ErrorBoundary 
+export const LazyShareModal = lazy(() => import('../components/ShareModal').then(module => ({ 
+  default: module.ShareModal 
+})));
+
+export const LazyVideoProcessor = lazy(() => import('../components/VideoProcessor').then(module => ({ 
+  default: module.VideoProcessor 
 })));
 
 // Dynamic import utilities
 export const loadModule = async (modulePath: string) => {
   try {
-    const module = await import(modulePath);
+    // Use @vite-ignore to suppress dynamic import warning
+    const module = await import(/* @vite-ignore */ modulePath);
     return module.default || module;
   } catch (error) {
     console.error(`Failed to load module ${modulePath}:`, error);
@@ -78,11 +79,10 @@ export const loadScript = (src: string, async = true): Promise<void> => {
 export const preloadChunk = (chunkName: string) => {
   // Preload specific chunks when needed
   const chunks = {
-    'feature-color-grading': () => import('../components/ColorGrader'),
-    'feature-video-editor': () => import('../components/VideoEditor'),
-    'feature-pwa': () => import('../components/PWAInstallPrompt'),
-    'supabase-auth': () => import('@supabase/auth-js'),
-    'supabase-realtime': () => import('@supabase/realtime-js'),
+    'share-modal': () => import('../components/ShareModal'),
+    'video-processor': () => import('../components/VideoProcessor'),
+    'pwa-install': () => import('../components/PWAInstallPrompt'),
+    'error-boundary': () => import('../components/ErrorBoundary'),
   };
 
   const loadChunk = chunks[chunkName as keyof typeof chunks];
@@ -97,9 +97,9 @@ export const preloadChunk = (chunkName: string) => {
 export const loadRouteChunks = (route: string) => {
   const routeChunks: Record<string, string[]> = {
     '/': ['react-vendor', 'ui-vendor'],
-    '/color-grading': ['feature-color-grading'],
-    '/video-editor': ['feature-video-editor'],
-    '/settings': ['feature-pwa'],
+    '/upload': ['video-processor'],
+    '/share': ['share-modal'],
+    '/settings': ['pwa-install'],
   };
 
   const chunks = routeChunks[route];

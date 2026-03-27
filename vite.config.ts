@@ -194,14 +194,17 @@ export default defineConfig(({ mode }) => {
             }
             // App chunks - split by feature
             if (id.includes('src/components')) {
-              if (id.includes('ColorGrader')) {
-                return 'feature-color-grading';
+              if (id.includes('ShareModal')) {
+                return 'feature-share-modal';
               }
-              if (id.includes('VideoEditor')) {
-                return 'feature-video-editor';
+              if (id.includes('VideoProcessor')) {
+                return 'feature-video-processor';
               }
-              if (id.includes('PWA')) {
-                return 'feature-pwa';
+              if (id.includes('PWAInstallPrompt')) {
+                return 'feature-pwa-install';
+              }
+              if (id.includes('ErrorBoundary')) {
+                return 'feature-error-boundary';
               }
               return 'components';
             }
