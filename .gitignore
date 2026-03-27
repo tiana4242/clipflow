@@ -39,17 +39,11 @@ processed/*
 # Vercel
 .vercel
 
-# Railway
-railway.json
-
-# Keep Render configs
-!render.yaml
-!RENDER-DEPLOYMENT.md
-
-# Keep Netlify configs
-!netlify.toml
-!netlify/
-!NETLIFY-DEPLOYMENT.md
+# Netlify
+netlify.toml
+netlify/
+NETLIFY-DEPLOYMENT.md
+PWA-DEPLOYMENT.md
 
 # Package manager
 package-lock.json
