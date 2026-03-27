@@ -2,15 +2,19 @@
 export const API_CONFIG = {
   LOCAL_URL: 'http://localhost:3001',
   getCurrentUrl: () => {
-    // Check deployment environment
-    const hostname = window.location.hostname;
+    // Force localhost for development to avoid CORS issues
+    console.log('🔧 API Config - Current hostname:', window.location.hostname);
     
-    if (hostname.includes('localhost')) {
-      // Development: Use local backend
-      return import.meta.env.VITE_API_URL || 'http://localhost:3001';
-    } else {
-      // Production: Use environment variable or fallback
-      return import.meta.env.VITE_API_URL || 'http://localhost:3001';
+    // Always use localhost in development
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      const apiUrl = 'http://localhost:3001';
+      console.log('🔧 Using local backend:', apiUrl);
+      return apiUrl;
     }
+    
+    // Production fallback
+    const prodUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+    console.log('🔧 Using production URL:', prodUrl);
+    return prodUrl;
   }
 };

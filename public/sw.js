@@ -166,6 +166,17 @@ self.addEventListener('notificationclick', (event) => {
 // ==================== STRATEGY FUNCTIONS ====================
 
 async function cacheFirst(request, cacheName, maxAge = null) {
+  // Don't cache API requests - let them go through directly
+  if (request.url.includes('/api/')) {
+    try {
+      const response = await fetch(request);
+      return response;
+    } catch (err) {
+      console.log('[SW] API request failed:', err);
+      throw err;
+    }
+  }
+
   const cache = await caches.open(cacheName);
   const cached = await cache.match(request);
   
