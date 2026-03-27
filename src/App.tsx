@@ -902,12 +902,18 @@ export default function App() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      if (session) fetchClips();
+      // Defer clips fetch to improve critical path
+      if (session) {
+        setTimeout(() => fetchClips(), 100);
+      }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-      if (session) fetchClips();
+      // Defer clips fetch to improve critical path
+      if (session) {
+        setTimeout(() => fetchClips(), 100);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -1005,15 +1011,29 @@ export default function App() {
   const fetchClips = async () => {
     try {
       const token = (await supabase.auth.getSession()).data.session?.access_token;
+      
+      // Add timeout and retry logic
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+      
       const res = await fetch(`${API_URL}/api/clips`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { 'Authorization': `Bearer ${token}` },
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
+      
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
+      
       const data = await res.json();
       if (data.clips) {
         setClips(data.clips);
       }
     } catch (err) {
       console.error('Failed to fetch clips:', err);
+      // Don't set error state, just log it to avoid UI disruption
     }
   };
 
