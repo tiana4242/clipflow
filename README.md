@@ -87,7 +87,7 @@ npm run dev
 ### Other Options
 - **Self-hosting**: VPS with Docker
 - **PaaS**: Heroku, Northflank, Fly.io
-- **Static hosting**: Netlify + serverless functions
+- **Static hosting**: Any static hosting service
 
 ## 📁 Project Structure
 

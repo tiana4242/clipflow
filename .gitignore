@@ -36,17 +36,6 @@ uploads/*
 processed/*
 !processed/.gitkeep
 
-# Vercel
-.vercel
-vercel.json
-
-# Netlify
-netlify.toml
-netlify/
-NETLIFY-DEPLOYMENT.md
-PWA-DEPLOYMENT.md
-GITHUB-PAGES-DEPLOYMENT.md
-
 # Package manager
 # package-lock.json
 yarn.lock
@@ -56,6 +45,3 @@ tmp/
 temp/
 *.bak
 *.backup
-
-# Netlify
-.netlify/
