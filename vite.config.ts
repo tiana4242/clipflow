@@ -163,21 +163,72 @@ export default defineConfig(({ mode }) => {
       },
       rollupOptions: {
         output: {
-          manualChunks: {
-            'react-vendor': ['react', 'react-dom'],
-            'ui-vendor': ['lucide-react'],
-            'supabase': ['@supabase/supabase-js'],
-            'pwa': ['vite-plugin-pwa']
+          manualChunks: (id) => {
+            // Split vendor chunks more granularly
+            if (id.includes('react') || id.includes('react-dom')) {
+              return 'react-vendor';
+            }
+            if (id.includes('lucide-react')) {
+              return 'ui-vendor';
+            }
+            if (id.includes('@supabase')) {
+              // Split Supabase into smaller chunks
+              if (id.includes('auth-js')) {
+                return 'supabase-auth';
+              }
+              if (id.includes('realtime-js')) {
+                return 'supabase-realtime';
+              }
+              return 'supabase-core';
+            }
+            if (id.includes('vite-plugin-pwa')) {
+              return 'pwa';
+            }
+            // Split large utility libraries
+            if (id.includes('node_modules')) {
+              return 'vendor';
+            }
+            // App chunks - split by feature
+            if (id.includes('src/components')) {
+              if (id.includes('ColorGrader')) {
+                return 'feature-color-grading';
+              }
+              if (id.includes('VideoEditor')) {
+                return 'feature-video-editor';
+              }
+              if (id.includes('PWA')) {
+                return 'feature-pwa';
+              }
+              return 'components';
+            }
+            if (id.includes('src/hooks')) {
+              return 'hooks';
+            }
+            if (id.includes('src/utils')) {
+              return 'utils';
+            }
+            // Dynamic imports will be automatically split
+            return undefined;
           },
           chunkFileNames: 'assets/[name]-[hash].js',
           entryFileNames: 'assets/[name]-[hash].js',
           assetFileNames: 'assets/[name]-[hash].[ext]'
+        },
+        treeshake: {
+          moduleSideEffects: false,
+          propertyReadSideEffects: false,
+          tryCatchDeoptimization: false
+        },
+        external: () => {
+          // Don't bundle development-only dependencies
+          return false;
         }
       },
-      chunkSizeWarningLimit: 300,
+      chunkSizeWarningLimit: 200, // Lower threshold for better chunking
       cssCodeSplit: true,
       cssMinify: true,
-      assetsInlineLimit: 4096
+      assetsInlineLimit: 4096,
+      treeShaking: true
     },
     define: {
       'process.env.NODE_ENV': '"production"'
