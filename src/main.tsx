@@ -24,6 +24,12 @@ const initializePerformance = () => {
   
   // Register Service Worker for PWA (only in production, deferred)
   if ('serviceWorker' in navigator && import.meta.env.PROD) {
+    // Handle service worker controller changes for updates
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      // Reload when new service worker activates
+      window.location.reload();
+    });
+    
     // Defer SW registration to not block initial render
     if ('requestIdleCallback' in window) {
       requestIdleCallback(() => {
