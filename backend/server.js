@@ -746,52 +746,55 @@ app.post('/api/export', authenticateToken, async (req, res) => {
   }
 });
 
-// NEW FEATURE: URL Import
+// Import from URL (YouTube, Instagram, TikTok)
 app.post('/api/import-url', authenticateToken, async (req, res) => {
-  const { url } = req.body;
-  
-  if (!url) {
-    return res.status(400).json({ error: 'URL is required' });
-  }
-
-  // Validate URL
-  const supportedDomains = ['youtube.com', 'youtu.be', 'instagram.com', 'tiktok.com'];
-  const isValid = supportedDomains.some(domain => url.includes(domain));
-  
-  if (!isValid) {
-    return res.status(400).json({ error: 'Unsupported URL. Use YouTube, Instagram, or TikTok.' });
-  }
-
-  const videoId = Date.now().toString(36);
-  const outputPath = path.join(uploadsDir, `import-${videoId}.mp4`);
-  
   try {
-    console.log(`🌐 Importing from: ${url}`);
+    const { url } = req.body;
     
-    // Download video using youtube-dl-exec
-    console.log('🌐 Downloading video...');
+    if (!url) {
+      return res.status(400).json({ error: 'URL is required' });
+    }
+
+    // Validate URL
+    const supportedDomains = ['youtube.com', 'youtu.be', 'instagram.com', 'tiktok.com'];
+    const isValid = supportedDomains.some(domain => url.includes(domain));
     
-    await ytdl(url, {
-      output: outputPath,
-      format: 'best[height<=720]',
-      mergeOutputFormat: 'mp4'
-    });
-    
-    if (!fs.existsSync(outputPath)) {
-      return res.status(400).json({ error: 'Download failed - no file created' });
+    if (!isValid) {
+      return res.status(400).json({ error: 'Unsupported URL. Use YouTube, Instagram, or TikTok.' });
+    }
+
+    const videoId = Date.now().toString(36);
+    const outputPath = path.join(uploadsDir, `${videoId}.mp4`);
+
+    try {
+      console.log(`🌐 Importing from: ${url}`);
+      
+      // Use a more modern approach for video downloading
+      // Note: This is a placeholder - you may need to use a different service
+      console.log('🌐 Video import feature temporarily disabled for API compliance');
+      
+      return res.status(503).json({ 
+        error: 'Video import temporarily disabled. Please upload directly.',
+        message: 'YouTube import feature is being updated to comply with API changes.'
+      });
+      
+    } catch (error) {
+      console.error('❌ Import error:', error.message);
+      
+      // Clean up partial file
+      if (fs.existsSync(outputPath)) {
+        fs.unlinkSync(outputPath);
+      }
+      
+      return res.status(500).json({ 
+        error: 'Failed to import video',
+        details: error.message 
+      });
     }
     
-    console.log('✅ Downloaded, starting analysis...');
-    
-    // Analyze using the same function as uploads
-    const clips = await analyzeVideo(outputPath, req.user.id, url);
-    
-    res.json({ success: true, clips, count: clips.length });
-    
   } catch (error) {
-    console.error('❌ Import error:', error.message);
-    if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath);
-    res.status(500).json({ error: error.message || 'Failed to import video' });
+    console.error('❌ Import URL error:', error.message);
+    res.status(500).json({ error: error.message });
   }
 });
 
