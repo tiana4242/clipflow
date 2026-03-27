@@ -56,10 +56,10 @@ app.use((req, res, next) => {
 });
 
 app.use((req, res, next) => {
-  // Proper Content Security Policy for security
+  // Proper Content Security Policy for security with Trusted Types
   res.header('Content-Security-Policy', 
     "default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data:; " +
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:; " +
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: 'unsafe-hashes'; " +
     "style-src 'self' 'unsafe-inline' blob:; " +
     "img-src 'self' data: blob: https:; " +
     "font-src 'self' data: blob:; " +
@@ -67,13 +67,29 @@ app.use((req, res, next) => {
     "media-src 'self' blob:; " +
     "worker-src 'self' blob:; " +
     "frame-src 'self' blob:; " +
-    "object-src 'self' blob:;"
+    "object-src 'self' blob:; " +
+    "require-trusted-types-for 'script';"
   );
+  
+  // HSTS (HTTP Strict Transport Security)
+  res.header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+  
+  // COOP (Cross-Origin-Opener-Policy)
+  res.header('Cross-Origin-Opener-Policy', 'same-origin');
+  
+  // COEP (Cross-Origin-Embedder-Policy)
+  res.header('Cross-Origin-Embedder-Policy', 'require-corp');
+  
+  // Frame control policies
+  res.header('X-Frame-Options', 'DENY');
+  res.header('Content-Security-Policy-Report-Only', "frame-ancestors 'none';");
+  
+  // Additional security headers
   res.header('X-Content-Type-Options', 'nosniff');
-  res.header('X-Frame-Options', 'SAMEORIGIN');
   res.header('X-XSS-Protection', '1; mode=block');
   res.header('Referrer-Policy', 'strict-origin-when-cross-origin');
-  res.header('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  res.header('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=()');
+  
   next();
 });
 
