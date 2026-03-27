@@ -96,7 +96,6 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: false,
     target: 'esnext',
-    chunkSizeWarningLimit: 1000,
     minify: 'terser',
     terserOptions: {
       compress: {
@@ -111,10 +110,16 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          'vendor': ['react', 'react-dom'],
-          'ui': ['lucide-react']
-        }
+          'react-vendor': ['react', 'react-dom'],
+          'ui-vendor': ['lucide-react'],
+          'supabase': ['@supabase/supabase-js'],
+          'pwa': ['vite-plugin-pwa']
+        },
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]'
       }
-    }
+    },
+    chunkSizeWarningLimit: 500
   }
 })
