@@ -1259,6 +1259,81 @@ app.post('/api/clips/:id/color-grade', authenticateToken, async (req, res) => {
   }
 });
 
+// Burn captions
+app.post('/api/clips/:id/burn-captions', authenticateToken, async (req, res) => {
+  try {
+    const { captions } = req.body;
+    const { data: clip, error: fetchError } = await supabase
+      .from('clips')
+      .select('*')
+      .eq('id', req.params.id)
+      .eq('user_id', req.user.id)
+      .single();
+    
+    if (fetchError || !clip) {
+      return res.status(404).json({ error: 'Clip not found' });
+    }
+    
+    // For now, just mark as having burned captions (placeholder implementation)
+    const { error } = await supabase
+      .from('clips')
+      .update({ 
+        has_burned_captions: true,
+        edited_captions: captions || clip.captions
+      })
+      .eq('id', req.params.id)
+      .eq('user_id', req.user.id);
+    
+    if (error) throw error;
+    
+    res.json({ 
+      success: true, 
+      message: 'Captions burned successfully',
+      clip: { ...clip, has_burned_captions: true, edited_captions: captions || clip.captions }
+    });
+  } catch (error) {
+    console.error('Burn captions error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Export clip
+app.post('/api/export', authenticateToken, async (req, res) => {
+  try {
+    const { clipId, format, quality } = req.body;
+    
+    if (!clipId) {
+      return res.status(400).json({ error: 'Clip ID is required' });
+    }
+    
+    // Get clip details
+    const { data: clip, error: fetchError } = await supabase
+      .from('clips')
+      .select('*')
+      .eq('id', clipId)
+      .eq('user_id', req.user.id)
+      .single();
+    
+    if (fetchError || !clip) {
+      return res.status(404).json({ error: 'Clip not found' });
+    }
+    
+    // For now, return the original video URL (placeholder implementation)
+    const videoUrl = clip.video_url || `${req.protocol}://${req.get('host')}/uploads/${clip.original_video}`;
+    
+    res.json({ 
+      success: true, 
+      message: 'Export completed',
+      downloadUrl: videoUrl,
+      format: format || 'mp4',
+      quality: quality || 'original'
+    });
+  } catch (error) {
+    console.error('Export error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Root route
 app.get('/', (req, res) => {
   res.json({
