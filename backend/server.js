@@ -54,10 +54,10 @@ app.use((req, res, next) => {
 });
 
 app.use((req, res, next) => {
-  res.header('Content-Security-Policy', "default-src 'self' 'unsafe-inline' 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:gfwszuvlskrfuwiqmkfg.supabase.co wss://ws://localhost:5173; media-src 'self' blob:; worker-src 'self' blob:");
+  res.header('Content-Security-Policy', "default-src 'self' 'unsafe-inline' 'unsafe-eval' blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:; style-src 'self' 'unsafe-inline' blob:; img-src 'self' data: blob: https:; font-src 'self' data: blob:; connect-src 'self' https:gfwszuvlskrfuwiqmkfg.supabase.co ws://localhost:5173 wss://localhost:5173; media-src 'self' blob:; worker-src 'self' blob:; frame-src 'self' blob:; object-src 'self' blob:;");
   res.header('X-Content-Type-Options', 'nosniff');
-  res.header('X-Frame-Options', 'DENY');
-  res.header('X-XSS-Protection', '1; mode=block');
+  res.header('X-Frame-Options', 'SAMEORIGIN');
+  res.header('X-XSS-Protection', '0');
   next();
 });
 
