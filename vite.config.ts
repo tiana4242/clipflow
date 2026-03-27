@@ -5,7 +5,7 @@ export default defineConfig({
   plugins: [
     react()
   ],
-  base: '/clipflow/',
+  base: '/',
   build: {
     outDir: 'dist',
     sourcemap: false,
