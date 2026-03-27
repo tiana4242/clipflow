@@ -19,6 +19,10 @@ export const LazyVideoProcessor = lazy(() => import('../components/VideoProcesso
   default: module.VideoProcessor 
 })));
 
+export const LazyColorGrader = lazy(() => import('../components/ColorGrader').then(module => ({ 
+  default: module.ColorGrader 
+})));
+
 // Dynamic import utilities
 export const loadModule = async (modulePath: string) => {
   try {
@@ -83,6 +87,7 @@ export const preloadChunk = (chunkName: string) => {
     'video-processor': () => import('../components/VideoProcessor'),
     'pwa-install': () => import('../components/PWAInstallPrompt'),
     'error-boundary': () => import('../components/ErrorBoundary'),
+    'color-grader': () => import('../components/ColorGrader'),
   };
 
   const loadChunk = chunks[chunkName as keyof typeof chunks];
