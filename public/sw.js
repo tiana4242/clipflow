@@ -88,9 +88,9 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   
-  // 3. Supabase image assets - Cache First with very long cache
+  // 3. Supabase image assets - Cache First with optimization
   if (url.hostname.includes('supabase.co') && (url.pathname.includes('/storage/v1/object/public/') || url.pathname.includes('.jpg') || url.pathname.includes('.png') || url.pathname.includes('.webp'))) {
-    event.respondWith(cacheFirst(request, API_CACHE, 7 * 24 * 60 * 60 * 1000)); // 7 days for static images
+    event.respondWith(optimizeImageResponse(request));
     return;
   }
   
@@ -458,6 +458,50 @@ function formatBytes(bytes) {
   if (bytes === 0) return '0 B';
   const k = 1024;
   const sizes = ['B', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  const index = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, index)).toFixed(2)) + ' ' + sizes[index];
+}
+
+// ==================== IMAGE OPTIMIZATION ====================
+
+async function optimizeImageResponse(request) {
+const cache = await caches.open(API_CACHE);
+const cached = await cache.match(request);
+  
+// Check cache first (7 days for images)
+if (cached) {
+  const dateHeader = cached.headers.get('date');
+  if (dateHeader) {
+    const age = Date.now() - new Date(dateHeader).getTime();
+    if (age < 7 * 24 * 60 * 60 * 1000) { // 7 days
+      return cached;
+    }
+  }
+}
+  
+try {
+  const response = await fetch(request);
+  if (!response.ok) return response;
+  
+  // Add optimization headers
+  const optimizedResponse = new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: {
+      ...response.headers,
+      'Cache-Control': 'public, max-age=604800', // 7 days
+      'Vary': 'Accept',
+      'Content-Disposition': 'inline',
+      'X-Content-Type-Options': 'nosniff'
+    }
+  });
+  
+  // Cache the optimized response
+  cache.put(request, optimizedResponse.clone());
+  
+  return optimizedResponse;
+} catch (error) {
+  console.log('[SW] Image fetch failed, using cache:', error);
+  return cached || new Response('Image unavailable', { status: 504 });
+}
 }
