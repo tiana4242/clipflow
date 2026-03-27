@@ -33,6 +33,17 @@ if (ffmpegPath) {
 }
 
 const app = express();
+
+// HTTPS redirection middleware
+app.use((req, res, next) => {
+  // Force HTTPS in production
+  if (process.env.NODE_ENV === 'production' && req.protocol === 'http') {
+    const httpsUrl = `https://${req.headers.host}${req.url}`;
+    return res.redirect(301, httpsUrl);
+  }
+  next();
+});
+
 app.use(cors({
   origin: [
     process.env.FRONTEND_URL || 'http://localhost:5173',
@@ -58,20 +69,21 @@ app.use((req, res, next) => {
 app.use((req, res, next) => {
   // Proper Content Security Policy for security with Trusted Types
   res.header('Content-Security-Policy', 
-    "default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data:; " +
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: 'unsafe-hashes'; " +
-    "style-src 'self' 'unsafe-inline' blob:; " +
+    "default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: https:; " +
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: 'unsafe-hashes' https: unpkg.com cdnjs.cloudflare.com; " +
+    "style-src 'self' 'unsafe-inline' blob: https: fonts.googleapis.com; " +
     "img-src 'self' data: blob: https:; " +
-    "font-src 'self' data: blob:; " +
-    "connect-src 'self' https:gfwszuvlskrfuwiqmkfg.supabase.co https://www.googleapis.com blob: ws://localhost:5173 wss://localhost:5173; " +
-    "media-src 'self' blob:; " +
-    "worker-src 'self' blob:; " +
-    "frame-src 'self' blob:; " +
-    "object-src 'self' blob:; " +
-    "require-trusted-types-for 'script';"
+    "font-src 'self' data: blob: https: fonts.gstatic.com; " +
+    "connect-src 'self' https:gfwszuvlskrfuwiqmkfg.supabase.co https://www.googleapis.com blob: wss://localhost:5173 wss://localhost:5173 https:; " +
+    "media-src 'self' blob: https:; " +
+    "worker-src 'self' blob: https:; " +
+    "frame-src 'self' blob: https:; " +
+    "object-src 'self' blob: https:;" +
+    "require-trusted-types-for 'script';" +
+    "upgrade-insecure-requests;"
   );
   
-  // HSTS (HTTP Strict Transport Security)
+  // HSTS (HTTP Strict Transport Security) - Enforce HTTPS
   res.header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
   
   // COOP (Cross-Origin-Opener-Policy)
