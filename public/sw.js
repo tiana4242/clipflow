@@ -1,6 +1,9 @@
 // Clip Flow Service Worker
 // Handles offline video processing, caching, and background sync
 
+// Workbox manifest injection point
+self.__WB_MANIFEST
+
 const CACHE_VERSION = 'clipflow-v1';
 const CORE_CACHE = `${CACHE_VERSION}-core`;
 const VIDEO_CACHE = `${CACHE_VERSION}-videos`;
