@@ -121,5 +121,11 @@ export default defineConfig({
       }
     },
     chunkSizeWarningLimit: 500
+  },
+  define: {
+    'process.env.NODE_ENV': '"production"'
+  },
+  esbuild: {
+    drop: ['console', 'debugger']
   }
 })
