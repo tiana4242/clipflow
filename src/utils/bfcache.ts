@@ -53,7 +53,7 @@ class BFCacheManagerImpl implements BFCacheManager {
       this.prepareForBFCache();
     } else if (document.visibilityState === 'visible') {
       // Page is visible, check if restored from bfcache
-      this.handlePageRestore();
+      this.restoreFromBFCache();
     }
   }
 
