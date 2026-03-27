@@ -38,6 +38,7 @@ processed/*
 
 # Vercel
 .vercel
+vercel.json
 
 # Netlify
 netlify.toml

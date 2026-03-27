@@ -19,27 +19,27 @@ export default defineConfig({
         background_color: '#0f172a',
         display: 'standalone',
         orientation: 'any',
-        scope: '/',
-        start_url: '/',
+        scope: '/clipflow/',
+        start_url: '/clipflow/',
         icons: [
           {
-            src: '/icons/icon-192x192.png',
+            src: '/clipflow/icons/icon-192x192.png',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: '/icons/icon-512x512.png',
+            src: '/clipflow/icons/icon-512x512.png',
             sizes: '512x512',
             type: 'image/png'
           },
           {
-            src: '/icons/icon-maskable-192x192.png',
+            src: '/clipflow/icons/icon-maskable-192x192.png',
             sizes: '192x192',
             type: 'image/png',
             purpose: 'maskable'
           },
           {
-            src: '/icons/icon-maskable-512x512.png',
+            src: '/clipflow/icons/icon-maskable-512x512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable'
@@ -89,6 +89,7 @@ export default defineConfig({
       }
     })
   ],
+  base: '/clipflow/',
   build: {
     outDir: 'dist',
     sourcemap: true,
