@@ -82,12 +82,14 @@ export default defineConfig({
   ],
   base: '/',
   server: {
+    port: 5173,
+    host: 'localhost',
     hmr: {
-      port: 5173,
-      host: 'localhost'
+      overlay: true
     },
     watch: {
-      usePolling: false
+      usePolling: false,
+      interval: 100
     }
   },
   build: {
