@@ -14,12 +14,12 @@
   <meta name="description" content="AI-powered video clipping and sharing tool" />
   
   <!-- Icons -->
-  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-  <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
-  <link rel="mask-icon" href="/mask-icon.svg" color="#0f172a" />
+  <link rel="icon" type="image/svg+xml" href="/clipflow/vite.svg" />
+  <link rel="apple-touch-icon" href="/clipflow/icons/icon-192x192.png" />
+  <link rel="mask-icon" href="/clipflow/mask-icon.svg" color="#0f172a" />
   
   <!-- Manifest -->
-  <link rel="manifest" href="/manifest.json" />
+  <link rel="manifest" href="/clipflow/manifest.json" />
   
   <!-- Preconnect for performance -->
   <link rel="preconnect" href="https://unpkg.com" />
@@ -29,7 +29,12 @@
 </head>
 <body>
   <div id="root"></div>
-  <script type="module" src="/src/main.tsx"></script>
+  <script>
+    console.log('Loading Clip Flow...');
+    // Test if basic JavaScript works
+    document.getElementById('root').innerHTML = '<h1>Clip Flow is Loading...</h1>';
+  </script>
+  <script type="module" src="/clipflow/test-build.js"></script>
   <noscript>You need to enable JavaScript to run Clip Flow video processor.</noscript>
 </body>
 </html>
