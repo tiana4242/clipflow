@@ -1110,6 +1110,23 @@ app.post('/api/clips/:id/color-grade', authenticateToken, async (req, res) => {
   }
 });
 
+// Root route
+app.get('/', (req, res) => {
+  res.json({
+    message: 'ClipFlow Backend API',
+    status: 'running',
+    endpoints: [
+      'POST /api/analyze',
+      'GET /api/clips',
+      'DELETE /api/clips/:id',
+      'POST /api/process-clip',
+      'POST /api/generate-titles',
+      'POST /api/viral-score'
+    ],
+    version: '1.0.0'
+  });
+});
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
