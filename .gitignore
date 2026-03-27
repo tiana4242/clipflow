@@ -38,7 +38,6 @@ processed/*
 
 # Vercel
 .vercel
-vercel.json
 
 # Railway
 railway.json
