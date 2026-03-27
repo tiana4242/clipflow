@@ -1026,6 +1026,10 @@ export default function App() {
     try {
       const token = (await supabase.auth.getSession()).data.session?.access_token;
       
+      // DEBUG: Log the exact URL being used
+      console.log('🔍 fetchClips - API_URL:', API_URL);
+      console.log('🔍 fetchClips - Full URL:', `${API_URL}/api/clips`);
+      
       // Add timeout and retry logic
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
@@ -1046,7 +1050,9 @@ export default function App() {
         setClips(data.clips);
       }
     } catch (err) {
-      console.error('Failed to fetch clips:', err);
+      console.error('❌ Failed to fetch clips:', err);
+      console.error('❌ Error details:', err.message);
+      console.error('❌ API_URL being used:', API_URL);
       // Don't set error state, just log it to avoid UI disruption
     }
   };
@@ -1242,6 +1248,10 @@ export default function App() {
     formData.append('video', file);
 
     try {
+      // DEBUG: Log the exact URL being used
+      console.log('🔍 analyzeVideo - API_URL:', API_URL);
+      console.log('🔍 analyzeVideo - Full URL:', `${API_URL}/api/analyze`);
+      
       const res = await fetch(`${API_URL}/api/analyze`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
