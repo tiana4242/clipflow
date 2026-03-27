@@ -1005,16 +1005,11 @@ export default function App() {
   // Data Functions
   const fetchClips = async () => {
     try {
-      // Temporarily disabled to prevent CORS errors
-      // Uncomment after backend is redeployed with CORS fixes
-      console.log('🔄 fetchClips temporarily disabled - waiting for backend CORS fix');
-      return;
-      
-      // const token = (await supabase.auth.getSession()).data.session?.access_token;
-      // const res = await fetch(`${API_URL}/api/clips`, {
-      //   headers: { 'Authorization': `Bearer ${token}` }
-      // });
-      // const data = await res.json();
+      const token = (await supabase.auth.getSession()).data.session?.access_token;
+      const res = await fetch(`${API_URL}/api/clips`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
       if (data.clips) {
         setClips(data.clips);
       }
@@ -1208,13 +1203,6 @@ export default function App() {
   // Upload & Export
   const handleUpload = async (file: File) => {
     if (!file) return;
-    
-    // Temporarily disabled to prevent CORS errors
-    // Uncomment after backend is redeployed with CORS fixes
-    console.log('🔄 Upload temporarily disabled - waiting for backend CORS fix');
-    alert('Upload temporarily disabled - please redeploy backend with CORS fixes first');
-    return;
-    
     setLoading(true);
     const token = (await supabase.auth.getSession()).data.session?.access_token;
     const formData = new FormData();
