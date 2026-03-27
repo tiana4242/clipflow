@@ -7,7 +7,7 @@ interface ClipCardProps {
   onDelete: (id: string) => void
 }
 
-export function ClipCard({ clip, onDelete }: ClipCardProps) {
+export function ShareModal({ clip, onDelete }: ClipCardProps) {
   const [showShareMenu, setShowShareMenu] = useState(false)
   const [copied, setCopied] = useState(false)
   const [copiedCaption, setCopiedCaption] = useState(false)

@@ -2,7 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import { resolve } from 'path'
-import type { Connect } from 'vite'
+import type { IncomingMessage, ServerResponse } from 'http'
 
 // Try to import compression plugin, but handle if it's not available
 let compression: any = null;
@@ -137,7 +137,7 @@ export default defineConfig(({ mode }) => {
         interval: 100
       },
       middleware: [
-        (req: Connect.IncomingMessage, res: Connect.ServerResponse, next: Connect.NextFunction) => {
+        (req: IncomingMessage, res: ServerResponse, next: (err?: any) => void) => {
           // Enable compression for text-based files
           const acceptEncoding = req.headers['accept-encoding'] || '';
           const shouldCompress = acceptEncoding.includes('gzip') || acceptEncoding.includes('br');
