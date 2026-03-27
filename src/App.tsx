@@ -350,7 +350,8 @@ const ClipCard: React.FC<{
             ? `brightness(${clip.color_grade.brightness}%) contrast(${clip.color_grade.contrast}%) saturate(${clip.color_grade.saturation}%) ${getFilterCSS(clip.color_grade.filter)}` 
             : 'none'
           }
-          loading="lazy"
+          fetchpriority={index === 0 ? "high" : "auto"}
+          loading={index === 0 ? "eager" : "lazy"}
           onError={(e) => {
             (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360"><rect fill="%231e293b" width="640" height="360"/><text fill="%2364748b" font-family="sans-serif" font-size="20" x="320" y="180" text-anchor="middle">No Preview</text></svg>';
           }}
@@ -1802,7 +1803,13 @@ export default function App() {
                     className="bg-slate-900/50 border border-slate-800 rounded-2xl p-4 flex items-center gap-4 hover:border-slate-700 transition-colors group"
                   >
                     <div className="relative w-40 aspect-video rounded-xl overflow-hidden flex-shrink-0">
-                      <img src={clip.thumbnail_url} alt={clip.title} className="w-full h-full object-cover" />
+                      <img 
+                        src={clip.thumbnail_url} 
+                        alt={clip.title} 
+                        className="w-full h-full object-cover"
+                        fetchpriority="low"
+                        loading="lazy"
+                      />
                       <div className="absolute bottom-2 right-2 bg-black/70 px-2 py-1 rounded text-xs">
                         {Math.round(clip.end_time - clip.start_time)}s
                       </div>
@@ -1990,6 +1997,8 @@ export default function App() {
                   alt="Preview"
                   className="w-full h-full object-cover color-filter-image"
                   data-filter-value={`brightness(${colorAdjustments.brightness}%) contrast(${colorAdjustments.contrast}%) saturate(${colorAdjustments.saturation}%) ${getFilterCSS(colorAdjustments.filter)}`}
+                  fetchpriority="high"
+                  loading="eager"
                 />
               </div>
               
