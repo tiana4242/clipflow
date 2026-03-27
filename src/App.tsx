@@ -3,7 +3,7 @@ import './styles/dynamic-styles.css';
 import { usePWA } from './hooks/usePWA'
 import { PerformanceOptimizer, CSSCustomProperties } from './utils/performance'
 import { AccessibilityManager } from './utils/accessibility'
-import { supabase } from './lib/supabase'
+import { api, tokenManager } from './lib/api'
 import { API_CONFIG } from './config/api'
 import { useBatchedAPI } from './utils/batchedAPI'
 import { requestCache, CACHE_KEYS } from './utils/requestCache'
@@ -912,27 +912,27 @@ export default function App() {
 
   // Effects
   useEffect(() => {
-    // Initialize accessibility manager
-    AccessibilityManager.init();
-    
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      // Defer clips fetch to improve critical path
-      if (session) {
-        setTimeout(() => fetchClips(), 100);
+    // Initialize user session from token
+    const initializeSession = async () => {
+      const token = tokenManager.getToken();
+      if (token) {
+        try {
+          const user = await api.getCurrentUser(token);
+          setSession({ user, access_token: token });
+          // Defer clips fetch to improve critical path
+          if (user) {
+            fetchClips();
+          }
+        } catch (error) {
+          console.error('Failed to initialize session:', error);
+          tokenManager.removeToken();
+          setSession(null);
+        }
       }
-    });
+    };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      // Defer clips fetch to improve critical path
-      if (session) {
-        setTimeout(() => fetchClips(), 100);
-        AccessibilityManager.announce('Successfully signed in to Clip Flow');
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    // Initialize session on mount
+    initializeSession();
   }, []);
 
   useEffect(() => {
@@ -997,24 +997,23 @@ export default function App() {
   const fetchClips = async () => {
     try {
       setLoading(true);
-      const token = (await supabase.auth.getSession()).data.session?.access_token;
-      const userId = (await supabase.auth.getUser()).data.user?.id;
+      const token = tokenManager.getToken();
       
-      if (!token || !userId) {
+      if (!token) {
         throw new Error('User not authenticated');
       }
       
-      console.log('🔍 fetchClips - Using batched API with caching');
+      console.log('🔍 fetchClips - Using unified API with caching');
       
-      // Use batched API with caching
-      const data = await getClips(userId, token);
+      // Use unified API with caching
+      const clips = await api.getClips(token);
       
-      if (data.clips) {
-        setClips(data.clips);
+      if (clips) {
+        setClips(clips);
         // Update collections
         const newCollections: Record<string, VideoClip[]> = {};
-        data.clips.forEach((clip: VideoClip) => {
-          const collection = clip.collection_name || 'Uncategorized';
+        clips.forEach((clip: VideoClip) => {
+          const collection = clip.folder_name || clip.collection_name || clip.source_video_id || 'Uncategorized';
           if (!newCollections[collection]) {
             newCollections[collection] = [];
           }
@@ -1034,14 +1033,9 @@ export default function App() {
   const signInWithGoogle = async () => {
     setGoogleLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: window.location.origin,
-          queryParams: { access_type: 'offline', prompt: 'consent' }
-        }
-      });
-      if (error) throw error;
+      // Note: Google OAuth would need to be implemented in backend
+      // For now, show message
+      alert('Google sign in will be available in the next update. Please use email sign in for now.');
     } catch (err: any) {
       alert('Google sign in failed: ' + err.message);
       setGoogleLoading(false);
@@ -1052,10 +1046,16 @@ export default function App() {
     e.preventDefault();
     try {
       if (authMode === 'signup') {
-        await supabase.auth.signUp({ email, password });
-        alert('Check your email for confirmation!');
+        const result = await api.signUp(email, password, email.split('@')[0]);
+        alert('Sign up successful! Please check your email for confirmation.');
+        setAuthMode('login');
       } else {
-        await supabase.auth.signInWithPassword({ email, password });
+        const result = await api.signIn(email, password);
+        if (result.user && result.token) {
+          tokenManager.setToken(result.token);
+          setSession({ user: result.user, access_token: result.token });
+          fetchClips();
+        }
       }
     } catch (err: any) {
       alert(err.message || 'Authentication failed');
@@ -1063,9 +1063,18 @@ export default function App() {
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    setClips([]);
-    setMobileMenuOpen(false);
+    try {
+      const token = tokenManager.getToken();
+      if (token) {
+        await api.signOut(token);
+      }
+      tokenManager.removeToken();
+      setSession(null);
+      setClips([]);
+      setMobileMenuOpen(false);
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   // Data Functions
@@ -1096,16 +1105,9 @@ export default function App() {
     if (!confirm('⚠️ Delete ALL clips? This cannot be undone.')) return;
     setDeletingAll(true);
     try {
-      const token = (await supabase.auth.getSession()).data.session?.access_token;
-      const res = await fetch(`${API_URL}/api/clips`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        updateClipsWithHistory([], 'delete-all');
-        alert(`✅ Deleted ${data.deleted} clips`);
-      }
+      await api.deleteAllClips(tokenManager.getToken()!);
+      updateClipsWithHistory([], 'delete-all');
+      alert(`✅ Deleted all clips`);
     } catch (err) {
       console.error(err);
     } finally {
@@ -1115,19 +1117,13 @@ export default function App() {
 
   const deleteClip = async (clipId: string, e?: React.MouseEvent) => {
     e?.stopPropagation();
-    if (!confirm('Delete this clip?')) return;
+    if (!confirm('Delete this Clip?')) return;
     setDeleting(clipId);
     try {
-      const token = (await supabase.auth.getSession()).data.session?.access_token;
-      const res = await fetch(`${API_URL}/api/clips/${clipId}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (res.ok) {
-        const newClips = clips.filter(c => c.id !== clipId);
-        updateClipsWithHistory(newClips, 'delete-clip');
-        if (selectedClip?.id === clipId) setSelectedClip(null);
-      }
+      await api.deleteClip(clipId, tokenManager.getToken()!);
+      const newClips = clips.filter(c => c.id !== clipId);
+      updateClipsWithHistory(newClips, 'delete-clip');
+      if (selectedClip?.id === clipId) setSelectedClip(null);
     } catch (err) {
       console.error(err);
     } finally {
