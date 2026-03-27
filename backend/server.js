@@ -12,12 +12,14 @@ import { fileURLToPath } from 'url';
 import { exec, execSync } from 'child_process';
 import { promisify } from 'util';
 import ytdl from 'youtube-dl-exec';
+import axios from 'axios';
 
 // API Keys (hardcoded for user convenience)
 const SUPABASE_URL = 'https://gfwszuvlskrfuwiqmkfg.supabase.co';
 const SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdmd3N6dXZsc2tyZnV3aXFta2ZnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MzE0MjkyNCwiZXhwIjoyMDg4NzE4OTI0fQ.K-kfRzd4HfbMJDWMtg4UC10yLrRmWgOut7RhoBcEoZA';
 const GROQ_API_KEY = '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'; // Replace with your real Groq key  
 const DEEPGRAM_API_KEY = '6c399867f4153d746880aaeab61552843d781d20'; // Replace with your real Deepgram key
+const YOUTUBE_API_KEY = 'YOUR_YOUTUBE_API_KEY'; // Replace with your YouTube Data API v3 key
 
 dotenv.config();
 
@@ -111,6 +113,76 @@ const authenticateToken = async (req, res, next) => {
     return res.status(403).json({ error: 'Invalid token' });
   }
 };
+
+// YOUTUBE DATA API v3 FUNCTIONS
+function extractVideoId(url) {
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
+    /youtube\.com\/watch\?.*v=([^&\n?#]+)/
+  ];
+  
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match) return match[1];
+  }
+  return null;
+}
+
+async function getYouTubeVideoInfo(videoId) {
+  try {
+    const response = await axios.get('https://www.googleapis.com/youtube/v3/videos', {
+      params: {
+        part: 'snippet,contentDetails,statistics',
+        id: videoId,
+        key: YOUTUBE_API_KEY
+      }
+    });
+
+    if (response.data.items.length === 0) {
+      throw new Error('Video not found');
+    }
+
+    const video = response.data.items[0];
+    return {
+      id: video.id,
+      title: video.snippet.title,
+      description: video.snippet.description,
+      duration: video.contentDetails.duration,
+      thumbnail: video.snippet.thumbnails.high?.url || video.snippet.thumbnails.default?.url,
+      publishedAt: video.snippet.publishedAt,
+      statistics: video.statistics
+    };
+  } catch (error) {
+    console.error('❌ YouTube API error:', error.message);
+    throw error;
+  }
+}
+
+async function downloadYouTubeVideo(videoId, outputPath) {
+  try {
+    // Note: YouTube Data API v3 doesn't provide direct video download
+    // We need to use a third-party service or library for actual download
+    // For now, we'll return the video info and let the user handle download
+    
+    const videoInfo = await getYouTubeVideoInfo(videoId);
+    
+    // In a production environment, you would:
+    // 1. Use a service like yt-dlp, youtube-dl, or a commercial API
+    // 2. Or use YouTube's download functionality for eligible content
+    // 3. Or integrate with a video processing service
+    
+    console.log('🎬 Video info retrieved:', videoInfo.title);
+    console.log('⚠️  Note: Actual video download requires additional setup');
+    
+    return {
+      success: true,
+      videoInfo,
+      downloadPath: null // Would be set when actual download is implemented
+    };
+  } catch (error) {
+    throw error;
+  }
+}
 
 // DEEPGRAM REST API
 async function transcribeWithDeepgram(audioPath) {
@@ -769,13 +841,45 @@ app.post('/api/import-url', authenticateToken, async (req, res) => {
     try {
       console.log(`🌐 Importing from: ${url}`);
       
-      // Use a more modern approach for video downloading
-      // Note: This is a placeholder - you may need to use a different service
-      console.log('🌐 Video import feature temporarily disabled for API compliance');
+      // Check if it's a YouTube URL
+      if (url.includes('youtube.com') || url.includes('youtu.be')) {
+        const extractedVideoId = extractVideoId(url);
+        
+        if (!extractedVideoId) {
+          return res.status(400).json({ error: 'Invalid YouTube URL' });
+        }
+        
+        if (YOUTUBE_API_KEY === 'YOUR_YOUTUBE_API_KEY') {
+          return res.status(503).json({ 
+            error: 'YouTube API key not configured',
+            message: 'Please set up a YouTube Data API v3 key to use this feature.'
+          });
+        }
+        
+        // Get video info using YouTube Data API v3
+        const videoInfo = await getYouTubeVideoInfo(extractedVideoId);
+        
+        console.log('✅ YouTube video info retrieved:', videoInfo.title);
+        
+        return res.json({
+          success: true,
+          message: 'YouTube video information retrieved successfully',
+          videoInfo: {
+            title: videoInfo.title,
+            description: videoInfo.description,
+            thumbnail: videoInfo.thumbnail,
+            duration: videoInfo.duration,
+            publishedAt: videoInfo.publishedAt,
+            statistics: videoInfo.statistics
+          },
+          note: 'Video download requires additional setup. You can use this information to download manually.'
+        });
+      }
       
+      // For Instagram and TikTok, show placeholder
       return res.status(503).json({ 
-        error: 'Video import temporarily disabled. Please upload directly.',
-        message: 'YouTube import feature is being updated to comply with API changes.'
+        error: 'Instagram/TikTok import not yet implemented',
+        message: 'Direct video upload is recommended for these platforms.'
       });
       
     } catch (error) {
