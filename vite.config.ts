@@ -192,7 +192,7 @@ export default defineConfig(({ mode }) => {
             if (id.includes('node_modules')) {
               return 'vendor';
             }
-            // App chunks - split by feature
+            // App chunks - split by feature and consolidate small utilities
             if (id.includes('src/components')) {
               if (id.includes('ShareModal')) {
                 return 'feature-share-modal';
@@ -208,11 +208,26 @@ export default defineConfig(({ mode }) => {
               }
               return 'components';
             }
+            // Consolidate utilities into fewer chunks
+            if (id.includes('src/utils')) {
+              if (id.includes('performance') || id.includes('accessibility') || id.includes('bfcache')) {
+                return 'utils-core';
+              }
+              if (id.includes('lazyLoad') || id.includes('batchedAPI') || id.includes('requestCache')) {
+                return 'utils-network';
+              }
+              return 'utils';
+            }
             if (id.includes('src/hooks')) {
               return 'hooks';
             }
-            if (id.includes('src/utils')) {
-              return 'utils';
+            // Consolidate config files
+            if (id.includes('src/config')) {
+              return 'config';
+            }
+            // Consolidate styles
+            if (id.includes('src/styles')) {
+              return 'styles';
             }
             // Dynamic imports will be automatically split
             return undefined;

@@ -6,6 +6,7 @@ import { LazyErrorBoundary } from './utils/lazyLoad'
 import { loadRouteChunks } from './utils/lazyLoad'
 import { bfcacheManager } from './utils/bfcache'
 import { AccessibilityManager } from './utils/accessibility'
+import { CriticalPathOptimizer } from './utils/deferredLoad'
 
 // Initialize performance optimizations
 const initializePerformance = () => {
@@ -14,6 +15,9 @@ const initializePerformance = () => {
   
   // Initialize accessibility manager
   AccessibilityManager.init();
+  
+  // Optimize critical path
+  CriticalPathOptimizer.optimizeLoadingSequence();
   
   // Preload initial chunks
   loadRouteChunks('/');

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './styles/dynamic-styles.css';
 import { usePWA } from './hooks/usePWA'
-import { PWAInstallPrompt } from './components/PWAInstallPrompt'
 import { PerformanceOptimizer, CSSCustomProperties } from './utils/performance'
 import { AccessibilityManager } from './utils/accessibility'
 import { supabase } from './lib/supabase'
@@ -17,6 +16,9 @@ import {
   Crop, Clock, Zap, PlusCircle, Pencil,
   Tag
 } from 'lucide-react';
+
+// Lazy load non-critical components
+const PWAInstallPrompt = React.lazy(() => import('./components/PWAInstallPrompt'));
 
 // Debug imports
 console.log('🔍 Icon imports:', {
