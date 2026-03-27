@@ -54,17 +54,6 @@ export default defineConfig({
       workbox: {
         runtimeCaching: [
           {
-            urlPattern: /^https:\/\/unpkg\.com\/@ffmpeg\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'ffmpeg-core',
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 24 * 60 * 60
-              }
-            }
-          },
-          {
             urlPattern: /.*\.(mp4|webm|mov|avi|mkv)$/i,
             handler: 'CacheFirst',
             options: {
@@ -108,7 +97,6 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          'ffmpeg-core': ['@ffmpeg/ffmpeg', '@ffmpeg/util'],
           'vendor': ['react', 'react-dom'],
           'ui': ['@headlessui/react', 'lucide-react']
         }

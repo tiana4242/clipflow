@@ -48,7 +48,7 @@ export function useClips() {
         throw new Error('Clip must be between 15-30 seconds')
       }
 
-      // Call backend to process clip (FFmpeg or similar)
+      // Call backend to process clip
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/process-clip`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
