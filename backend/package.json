@@ -1,10 +1,14 @@
 {
   "name": "clipflow-backend",
   "version": "1.0.0",
+  "description": "Unified backend for ClipFlow video processing app",
+  "main": "server.js",
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "dev": "node --watch server.js"
+    "dev": "nodemon server.js",
+    "build": "echo 'No build step required for Node.js'",
+    "test": "jest"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
@@ -22,5 +26,8 @@
   },
   "devDependencies": {
     "@types/fluent-ffmpeg": "^2.1.28"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

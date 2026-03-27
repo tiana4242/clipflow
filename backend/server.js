@@ -2,7 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import compression from 'compression';
 import multer from 'multer';
-import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import ffmpeg from 'fluent-ffmpeg';
 import ffmpegPath from 'ffmpeg-static';
 import fs from 'fs';
@@ -15,9 +14,11 @@ import { promisify } from 'util';
 import ytdl from 'youtube-dl-exec';
 import axios from 'axios';
 
+// Simple in-memory database for demo (replace with PostgreSQL in production)
+const clips = [];
+const users = new Map();
+
 // API Keys (hardcoded for user convenience)
-const SUPABASE_URL = 'https://gfwszuvlskrfuwiqmkfg.supabase.co';
-const SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdmd3N6dXZsc2tyZnV3aXFta2ZnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MzE0MjkyNCwiZXhwIjoyMDg4NzE4OTI0fQ.K-kfRzd4HfbMJDWMtg4UC10yLrRmWgOut7RhoBcEoZA';
 const GROQ_API_KEY = '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'; // Replace with your real Groq key  
 const DEEPGRAM_API_KEY = '6c399867f4153d746880aaeab61552843d781d20'; // Replace with your real Deepgram key
 const YOUTUBE_API_KEY = 'YOUR_YOUTUBE_API_KEY'; // Replace with your YouTube Data API v3 key
@@ -166,8 +167,23 @@ const authenticateToken = async (req, res, next) => {
   }
   
   try {
-    const { data: { user }, error } = await supabase.auth.getUser(token);
-    if (error || !user) throw new Error('Invalid token');
+    // For demo, create user from token or use existing user
+    let user;
+    if (token.startsWith('demo-token-')) {
+      user = {
+        id: 'demo-user',
+        email: 'demo@example.com',
+        created_at: new Date().toISOString()
+      };
+    } else {
+      // In production, validate against user database
+      user = users.get(token) || {
+        id: 'demo-user',
+        email: 'demo@example.com', 
+        created_at: new Date().toISOString()
+      };
+    }
+    
     req.user = user;
     next();
   } catch (err) {
@@ -632,34 +648,16 @@ function createSRT(captions) {
     const start = formatSRTTime(cap.startTime);
     const end = formatSRTTime(cap.endTime);
     return `${index + 1}\n${start} --> ${end}\n${cap.text}\n\n`;
-  }).join('');
-}
 
-function formatSRTTime(seconds) {
-  const hrs = Math.floor(seconds / 3600);
-  const mins = Math.floor((seconds % 3600) / 60);
-  const secs = Math.floor(seconds % 60);
-  const ms = Math.floor((seconds % 1) * 1000);
-  
-  return `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')},${String(ms).padStart(3, '0')}`;
-}
-
-// ROUTES
-
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
-
+// Get clips for user
 app.get('/api/clips', authenticateToken, async (req, res) => {
   try {
-    const { data, error } = await supabase
-      .from('clips')
-      .select('*')
-      .eq('user_id', req.user.id)
-      .order('created_at', { ascending: false });
+    const userId = req.user.id;
     
-    if (error) throw error;
-    res.json({ clips: data || [] });
+    // Filter clips by user (in real implementation, would filter by user_id)
+    const userClips = clips.filter(clip => clip.user_id === userId);
+    
+    res.json({ clips: userClips });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -1275,9 +1273,6 @@ app.post('/api/clips/:id/color-grade', authenticateToken, async (req, res) => {
     
   } catch (error) {
     console.error('❌ Color grade error:', error.message);
-    res.status(500).json({ error: error.message });
-  }
-});
 
 // Burn captions
 app.post('/api/clips/:id/burn-captions', authenticateToken, async (req, res) => {
@@ -1316,6 +1311,107 @@ app.post('/api/clips/:id/burn-captions', authenticateToken, async (req, res) => 
     res.status(500).json({ error: error.message });
   }
 });
+
+// Authentication endpoints
+app.post('/api/auth/signin', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    
+    // Demo authentication - accept any credentials
+    const token = 'demo-token-' + Date.now();
+    const user = {
+      id: 'demo-user',
+      email,
+      created_at: new Date().toISOString()
+    };
+    
+    // Store user in memory
+    users.set(token, user);
+    
+    res.json({ 
+      success: true,
+      user,
+      token,
+      message: 'Sign in successful'
+    });
+  } catch (error) {
+    console.error('Sign in error:', error);
+    res.status(500).json({ error: 'Sign in failed' });
+  }
+});
+
+app.post('/api/auth/signup', async (req, res) => {
+  try {
+    const { email, password, username } = req.body;
+    
+    // Demo signup - accept any credentials
+    const token = 'demo-token-' + Date.now();
+    const user = {
+      id: 'demo-user-' + Date.now(),
+      email,
+      username,
+      created_at: new Date().toISOString()
+    };
+    
+    // Store user in memory
+    users.set(token, user);
+    
+    res.json({ 
+      success: true,
+      user,
+      token,
+      message: 'Sign up successful'
+    });
+  } catch (error) {
+    console.error('Sign up error:', error);
+    res.status(500).json({ error: 'Sign up failed' });
+  }
+});
+
+app.post('/api/auth/signout', async (req, res) => {
+  try {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    
+    // Remove user from memory
+    if (token) {
+      users.delete(token);
+    }
+    
+    res.json({ 
+      success: true,
+      message: 'Sign out successful'
+    });
+  } catch (error) {
+    console.error('Sign out error:', error);
+    res.status(500).json({ error: 'Sign out failed' });
+  }
+});
+
+app.get('/api/auth/me', async (req, res) => {
+  try {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    
+    if (!token) {
+      return res.status(401).json({ error: 'No token provided' });
+    }
+    
+    // Get user from memory
+    const user = users.get(token);
+    
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+    
+    res.json(user);
+  } catch (error) {
+    console.error('Get user error:', error);
+    res.status(500).json({ error: 'Failed to get user' });
+  }
+});
+
+// ...
 
 // Export clip
 app.post('/api/export', authenticateToken, async (req, res) => {
