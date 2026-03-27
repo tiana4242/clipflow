@@ -19,6 +19,34 @@ const CORE_ASSETS = [
   '/offline.html'
 ];
 
+// BFCache support
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'BFCACHE_RESTORATION') {
+    console.log('📄 BFCache restoration detected in service worker');
+    // Handle any post-restoration tasks
+    event.ports[0].postMessage({ type: 'BFCACHE_ACK' });
+  }
+});
+
+// Handle bfcache restoration events
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cacheName => {
+          // Clean up old caches that might interfere with bfcache
+          if (cacheName !== CORE_CACHE && 
+              cacheName !== VIDEO_CACHE && 
+              cacheName !== API_CACHE && 
+              cacheName !== FFMPEG_CACHE) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
+  );
+});
+
 // Install: Cache core assets
 self.addEventListener('install', (event) => {
   console.log('[SW] Installing Clip Flow Service Worker...');

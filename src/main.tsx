@@ -4,6 +4,10 @@ import App from './App'
 import './index.css'
 import { LazyErrorBoundary } from './utils/lazyLoad'
 import { loadRouteChunks } from './utils/lazyLoad'
+import { bfcacheManager } from './utils/bfcache'
+
+// Initialize bfcache manager
+bfcacheManager;
 
 // Register Service Worker for PWA (only in production)
 if ('serviceWorker' in navigator && import.meta.env.PROD) {

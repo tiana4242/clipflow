@@ -102,16 +102,20 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 5173,
       host: true,
-      hmr: {
+      hmr: mode !== 'production' ? {
         overlay: true,
         port: 5173,
         clientPort: 5173,
         host: 'localhost'
-      },
+      } : false,
       watch: {
         usePolling: false,
         interval: 100
       }
+    },
+    preview: {
+      port: 4173,
+      host: true
     },
     build: {
       outDir: 'dist',
