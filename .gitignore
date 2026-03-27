@@ -45,6 +45,7 @@ netlify.toml
 netlify/
 NETLIFY-DEPLOYMENT.md
 PWA-DEPLOYMENT.md
+GITHUB-PAGES-DEPLOYMENT.md
 
 # Package manager
 # package-lock.json
