@@ -98,7 +98,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           'vendor': ['react', 'react-dom'],
-          'ui': ['@headlessui/react', 'lucide-react']
+          'ui': ['lucide-react']
         }
       }
     }
