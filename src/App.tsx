@@ -3,7 +3,7 @@ import './styles/dynamic-styles.css';
 import { usePWA } from './hooks/usePWA'
 import { PerformanceOptimizer, CSSCustomProperties } from './utils/performance'
 import { AccessibilityManager } from './utils/accessibility'
-import { api, tokenManager } from './lib/api'
+import { api, tokenManager } from './lib/unified-api'
 import { API_CONFIG } from './config/api'
 import { useBatchedAPI } from './utils/batchedAPI'
 import { requestCache, CACHE_KEYS } from './utils/requestCache'
@@ -912,15 +912,18 @@ export default function App() {
 
   // Effects
   useEffect(() => {
+    // Initialize accessibility manager
+    AccessibilityManager.init();
+    
     // Initialize user session from token
     const initializeSession = async () => {
       const token = tokenManager.getToken();
       if (token) {
         try {
           const user = await api.getCurrentUser(token);
-          setSession({ user, access_token: token });
-          // Defer clips fetch to improve critical path
           if (user) {
+            setSession({ user, access_token: token });
+            // Defer clips fetch to improve critical path
             fetchClips();
           }
         } catch (error) {
@@ -1133,146 +1136,140 @@ export default function App() {
 
   // Edit Functions
   const updateFolderName = async (source: string, newName: string) => {
-    const token = (await supabase.auth.getSession()).data.session?.access_token;
-    const clipsToUpdate = collections[source];
-    
     try {
-      // Update all clips in this collection
-      await Promise.all(clipsToUpdate.map(clip => 
-        fetch(`${API_URL}/api/clips/${clip.id}/folder`, {
-          method: 'PATCH',
-          headers: { 
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ folder_name: newName })
-        })
-      ));
+      const token = tokenManager.getToken();
+      if (!token) throw new Error('Not authenticated');
+      
+      // Get clips for user
+      const clips = await api.getClips(token);
+      const clipsToUpdate = collections[source];
+      
+      if (!clipsToUpdate) {
+        throw new Error('Collection not found');
+      }
+      
+      // Update clips in unified backend
+      for (const clip of clipsToUpdate) {
+        await api.updateClip(clip.id, { 
+          folder_name: newName 
+        }, token);
+      }
       
       // Update local state
-      const newClips = clips.map(c => {
-        if ((c.folder_name || c.collection_name || c.source_video_id || 'unsorted') === source) {
-          return { ...c, folder_name: newName };
-        }
-        return c;
-      });
-      updateClipsWithHistory(newClips, 'update-folder');
-      setEditingFolder(null);
-    } catch (err) {
-      console.error('Failed to update folder:', err);
+      const newCollections = { ...collections };
+      newCollections[newName] = clipsToUpdate;
+      setCollections(newCollections);
+      
+      alert(`✅ Folder renamed from "${source}" to "${newName}"`);
+    } catch (error) {
+      console.error('Failed to update folder name:', error);
+      alert('Failed to update folder name');
     }
   };
 
   const updateHashtags = async (clip: VideoClip, hashtags: string[]) => {
-    const token = (await supabase.auth.getSession()).data.session?.access_token;
     try {
-      const res = await fetch(`${API_URL}/api/clips/${clip.id}/hashtags`, {
-        method: 'PATCH',
-        headers: { 
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ hashtags })
-      });
+      const token = tokenManager.getToken();
+      if (!token) throw new Error('Not authenticated');
       
-      if (res.ok) {
-        const newClips = clips.map(c => c.id === clip.id ? { ...c, custom_hashtags: hashtags } : c);
-        updateClipsWithHistory(newClips, 'update-hashtags');
-      }
-    } catch (err) {
-      console.error('Failed to update hashtags:', err);
+      await api.updateClip(clip.id, { hashtags }, token);
+      
+      // Update local state
+      const newClips = clips.map(c => 
+        c.id === clip.id ? { ...c, hashtags } : c
+      );
+      setClips(newClips);
+      
+      alert('✅ Hashtags updated');
+    } catch (error) {
+      console.error('Failed to update hashtags:', error);
+      alert('Failed to update hashtags');
     }
   };
 
   const updateTitle = async (clip: VideoClip, title: string) => {
-    const token = (await supabase.auth.getSession()).data.session?.access_token;
     try {
-      const res = await fetch(`${API_URL}/api/clips/${clip.id}/title`, {
-        method: 'PATCH',
-        headers: { 
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ title })
-      });
+      const token = tokenManager.getToken();
+      if (!token) throw new Error('Not authenticated');
       
-      if (res.ok) {
-        const newClips = clips.map(c => c.id === clip.id ? { ...c, custom_title: title } : c);
-        updateClipsWithHistory(newClips, 'update-title');
-      }
-    } catch (err) {
-      console.error('Failed to update title:', err);
+      await api.updateClip(clip.id, { custom_title: title }, token);
+      
+      // Update local state
+      const newClips = clips.map(c => 
+        c.id === clip.id ? { ...c, custom_title: title } : c
+      );
+      setClips(newClips);
+      
+      alert('✅ Title updated');
+    } catch (error) {
+      console.error('Failed to update title:', error);
+      alert('Failed to update title');
     }
   };
 
   const saveCaptions = async (clip: VideoClip, captions: any[]) => {
-    const token = (await supabase.auth.getSession()).data.session?.access_token;
     try {
-      const res = await fetch(`${API_URL}/api/clips/${clip.id}/captions`, {
-        method: 'PATCH',
-        headers: { 
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ captions })
-      });
+      const token = tokenManager.getToken();
+      if (!token) throw new Error('Not authenticated');
       
-      if (res.ok) {
-        const newClips = clips.map(c => c.id === clip.id ? { ...c, edited_captions: captions } : c);
-        updateClipsWithHistory(newClips, 'update-captions');
-      }
-    } catch (err) {
-      console.error('Failed to save captions:', err);
+      await api.updateClip(clip.id, { edited_captions: captions }, token);
+      
+      // Update local state
+      const newClips = clips.map(c => 
+        c.id === clip.id ? { ...c, edited_captions: captions } : c
+      );
+      setClips(newClips);
+      
+      alert('✅ Captions saved');
+    } catch (error) {
+      console.error('Failed to save captions:', error);
+      alert('Failed to save captions');
     }
   };
 
   const saveManualClip = async (clip: VideoClip, start: number, end: number, title: string) => {
-    const token = (await supabase.auth.getSession()).data.session?.access_token;
     try {
-      const res = await fetch(`${API_URL}/api/clips/${clip.id}/trim`, {
-        method: 'PATCH',
-        headers: { 
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ start_time: start, end_time: end, title, is_manual_clip: true })
-      });
+      const token = tokenManager.getToken();
+      if (!token) throw new Error('Not authenticated');
       
-      if (res.ok) {
-        const newClips = clips.map(c => c.id === clip.id ? { ...c, start_time: start, end_time: end, custom_title: title, is_manual_clip: true } : c);
-        updateClipsWithHistory(newClips, 'manual-trim');
-      }
-    } catch (err) {
-      console.error('Failed to trim clip:', err);
+      await api.updateClip(clip.id, { 
+        start_time: start, 
+        end_time: end, 
+        custom_title: title,
+        is_manual_clip: true 
+      }, token);
+      
+      // Update local state
+      const newClips = clips.map(c => 
+        c.id === clip.id ? { ...c, start_time: start, end_time: end, custom_title: title, is_manual_clip: true } : c
+      );
+      setClips(newClips);
+      
+      alert('✅ Manual clip saved');
+    } catch (error) {
+      console.error('Failed to save manual clip:', error);
+      alert('Failed to save manual clip');
     }
   };
 
-  // Upload & Export
   const handleUpload = async (file: File) => {
     if (!file) return;
     setLoading(true);
-    const token = (await supabase.auth.getSession()).data.session?.access_token;
-    const formData = new FormData();
-    formData.append('video', file);
-
+    const token = tokenManager.getToken();
+    
     try {
-      // DEBUG: Log the exact URL being used
-      console.log('🔍 analyzeVideo - API_URL:', API_URL);
-      console.log('🔍 analyzeVideo - Full URL:', `${API_URL}/api/analyze`);
+      console.log('🔍 analyzeVideo - Using unified API');
+      const clips = await api.analyzeVideo(file.name, token);
       
-      const res = await fetch(`${API_URL}/api/analyze`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
-        body: formData
-      });
-      const data = await res.json();
-      if (res.ok && data.clips) {
-        updateClipsWithHistory([...data.clips, ...clips], 'upload');
+      if (clips && clips.length > 0) {
+        updateClipsWithHistory([...clips, ...clips], 'upload');
+        alert(`✅ Created ${clips.length} clips from video!`);
       } else {
-        alert(data.message || 'Upload failed');
+        alert('No clips were generated from the video');
       }
     } catch (err) {
-      alert('Upload failed');
+      console.error('❌ Upload failed:', err);
+      alert('Upload failed: ' + (err as Error).message);
     } finally {
       setLoading(false);
     }
@@ -1280,94 +1277,44 @@ export default function App() {
 
   const handleExport = async (clip: VideoClip, format: string) => {
     setExporting(true);
-    const token = (await supabase.auth.getSession()).data.session?.access_token;
+    const token = tokenManager.getToken();
+    
     try {
-      const res = await fetch(`${API_URL}/api/export`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          clipId: clip.id,
-          format,
-          clipData: {
-            startTime: clip.start_time,
-            endTime: clip.end_time,
-            original_video: clip.original_video,
-            captions: clip.edited_captions || clip.captions
-          }
-        })
-      });
-      const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
+      const result = await api.exportClip(clip.id, format, 'high', token);
+      
+      // Create download link
       const a = document.createElement('a');
-      a.href = url;
+      a.href = result.url;
       a.download = `clip-${clip.id}.mp4`;
       a.click();
-      window.URL.revokeObjectURL(url);
+      
+      alert('✅ Export completed successfully!');
     } catch (err) {
-      alert('Export failed');
+      console.error('❌ Export failed:', err);
+      alert('Export failed: ' + (err as Error).message);
     } finally {
       setExporting(false);
-    }
-  };
-
-  const shareClip = (platform: 'facebook' | 'tiktok' | 'youtube', clip: VideoClip) => {
-    const shareUrl = `${window.location.origin}/clip/${clip.id}`;
-    const hashtags = clip.custom_hashtags || clip.hashtags || generateHashtags(clip.title, clip.virality_score);
-
-    switch (platform) {
-      case 'facebook':
-        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(clip.title + ' ' + hashtags.slice(0, 3).join(' '))}`, '_blank', 'width=600,height=400');
-        break;
-      case 'tiktok':
-        const caption = `${clip.title}\n\n${hashtags.join(' ')}\n\nCreated with ClipFlow 🔥`;
-        navigator.clipboard.writeText(caption);
-        window.open('https://www.tiktok.com/upload', '_blank');
-        break;
-      case 'youtube':
-        window.open('https://studio.youtube.com/channel/UC/videos/upload', '_blank');
-        navigator.clipboard.writeText(`${clip.title}\n\n${hashtags.join(' ')}`);
-        handleExport(clip, '9:16');
-        break;
-    }
-  };
-
-  const copyHashtags = async (hashtags: string[]) => {
-    try {
-      await navigator.clipboard.writeText(hashtags.join(' '));
-      return true;
-    } catch (err) {
-      return false;
     }
   };
 
   const handleUrlImport = async () => {
     if (!urlInput.trim()) return;
     setImportingUrl(true);
+    const token = tokenManager.getToken();
     
     try {
-      const token = (await supabase.auth.getSession()).data.session?.access_token;
-      const res = await fetch(`${API_URL}/api/import-url`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ url: urlInput })
-      });
+      const clip = await api.importFromUrl(urlInput, token);
       
-      const data = await res.json();
-      if (data.success) {
-        updateClipsWithHistory([...data.clips, ...clips], 'import-url');
+      if (clip) {
+        updateClipsWithHistory([...clips, clip], 'import-url');
         setUrlInput('');
         setShowUrlImport(false);
-        alert(`Imported ${data.clips.length} clips from URL!`);
+        alert('✅ Imported clip from URL!');
       } else {
-        alert(data.error || 'Failed to import from URL');
+        alert('Failed to import clip from URL');
       }
     } catch (err) {
+      console.error('❌ Import failed:', err);
       alert('Import failed. Make sure URL is valid.');
     } finally {
       setImportingUrl(false);
@@ -1376,21 +1323,20 @@ export default function App() {
 
   const burnCaptions = async (clip: VideoClip) => {
     setProcessingCaptions(true);
+    const token = tokenManager.getToken();
+    
     try {
-      const token = (await supabase.auth.getSession()).data.session?.access_token;
-      const res = await fetch(`${API_URL}/api/clips/${clip.id}/burn-captions`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ captions: clip.edited_captions || clip.captions })
-      });
+      const updatedClip = await api.burnCaptions(clip.id, clip.captions || [], token);
       
-      if (res.ok) {
-        const updatedClip = { ...clip, has_burned_captions: true };
-        const newClips = clips.map(c => c.id === clip.id ? updatedClip : c);
-        updateClipsWithHistory(newClips, 'burn-captions');
-        alert('Captions burned into video!');
-      }
-    } catch (err) {
+      // Update local state
+      const newClips = clips.map(c => 
+        c.id === clip.id ? { ...c, has_burned_captions: true } : c
+      );
+      updateClipsWithHistory(newClips, 'burn-captions');
+      
+      alert('✅ Captions burned into video!');
+    } catch (error) {
+      console.error('Failed to burn captions:', error);
       alert('Failed to process captions');
     } finally {
       setProcessingCaptions(false);
@@ -1399,24 +1345,21 @@ export default function App() {
 
   const applyColorGrade = async (clip: VideoClip, grade: ColorGrade) => {
     setExporting(true);
+    const token = tokenManager.getToken();
+    
     try {
-      const token = (await supabase.auth.getSession()).data.session?.access_token;
-      const res = await fetch(`${API_URL}/api/clips/${clip.id}/color-grade`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ colorGrade: grade })
-      });
+      const updatedClip = await api.colorGradeClip(clip.id, grade, token);
       
-      if (res.ok) {
-        const updatedClip = { ...clip, color_grade: grade };
-        const newClips = clips.map(c => c.id === clip.id ? updatedClip : c);
-        updateClipsWithHistory(newClips, 'color-grade');
-        setShowColorGrader(false);
-      }
-    } catch (err) {
+      // Update local state
+      const newClips = clips.map(c => 
+        c.id === clip.id ? { ...c, color_grade: grade } : c
+      );
+      updateClipsWithHistory(newClips, 'color-grade');
+      setShowColorGrader(false);
+      
+      alert('✅ Color grade applied successfully!');
+    } catch (error) {
+      console.error('Failed to apply color grade:', error);
       alert('Color grading failed');
     } finally {
       setExporting(false);
